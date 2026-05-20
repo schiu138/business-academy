@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Culture Academy</title>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#484f58;
+  --blue:#388bfd;--blue-dim:#1f3a5f;--blue-light:#cae8ff;
+  --green:#3fb950;--green-dim:#0d2a14;--green-light:#ccffd8;
+  --red:#f85149;--red-dim:#2a0f0f;--red-light:#ffd0cc;
+  --gold:#d29922;--gold-dim:#2a1f00;--gold-light:#fff3b0;
+  --purple:#8957e5;--purple-dim:#1e1040;--purple-light:#e2d9fb;
+  --teal:#39d353;--r:10px;--rl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;line-height:1.5}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* HOME */
+#homeScreen{display:block}
+#gameScreen{display:none}
+.home-hero{text-align:center;padding:4rem 2rem 2rem}
+.home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);background:linear-gradient(135deg,#cae8ff,#8957e5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem}
+.home-hero p{color:var(--text2);font-size:1rem;max-width:500px;margin:0 auto 2.5rem}
+.region-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem;max-width:880px;margin:0 auto;padding:0 1.5rem 4rem}
+.region-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.region-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 30px rgba(56,139,253,0.12)}
+.region-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--blue))}
+.region-flag{font-size:2rem;margin-bottom:.75rem;display:block}
+.region-title{font-size:1.05rem;font-weight:600;margin-bottom:.3rem}
+.region-sub{font-size:.82rem;color:var(--text2);margin-bottom:.75rem}
+.region-countries{display:flex;flex-wrap:wrap;gap:5px}
+.country-chip{font-size:.72rem;padding:3px 8px;border-radius:5px;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.coming-soon{opacity:.5;cursor:default}
+.coming-soon:hover{transform:none;box-shadow:none;border-color:var(--border)}
+.soon-badge{font-size:.68rem;padding:2px 8px;border-radius:20px;background:var(--bg3);color:var(--text3);border:1px solid var(--border);position:absolute;top:.75rem;right:.75rem}
+
+/* GAME */
+#gameScreen{max-width:700px;margin:0 auto;padding:1rem 1rem 4rem}
+.game-nav{display:flex;align-items:center;gap:12px;padding:.75rem 0 1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+.back-btn{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;font-size:.82rem;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text2)}
+.game-title{font-size:.92rem;color:var(--text2);font-weight:500}
+.prog-bar{height:3px;background:var(--bg3);border-radius:2px;margin-bottom:1.25rem;overflow:hidden}
+.prog-fill{height:3px;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:2px;transition:width .4s}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.65rem;text-align:center}
+.sc-n{font-size:1.4rem;font-weight:600;color:var(--text)}
+.sc-l{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+
+/* MAP */
+.map-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:1rem}
+.map-header{display:flex;align-items:center;gap:10px;margin-bottom:.85rem}
+.st-badge{background:var(--blue-dim);color:var(--blue-light);padding:4px 12px;border-radius:6px;font-size:.8rem;font-weight:600;flex-shrink:0;letter-spacing:.04em}
+.st-info{flex:1}
+.st-name-row{display:flex;align-items:center;gap:8px}
+.st-name{font-size:1rem;font-weight:600;color:var(--text)}
+.st-cap{font-size:.73rem;color:var(--text2);margin-top:2px}
+.spk{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-size:.68rem;padding:0;color:var(--text2);flex-shrink:0;font-family:inherit;transition:all .15s}
+.spk:hover{background:var(--blue-dim);color:var(--blue-light);border-color:var(--blue)}
+.spk.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+#mapContainer{width:100%;height:190px;border-radius:8px;overflow:hidden;background:var(--bg3);margin-bottom:.75rem;position:relative}
+.tz-legend{display:flex;flex-wrap:wrap;gap:8px;font-size:.68rem;color:var(--text2);align-items:center;margin-bottom:.65rem}
+.tz-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.cities-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.city-item{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:6px;padding:3px 7px 3px 9px;background:var(--bg)}
+.city-item.cap{border-color:var(--blue);background:var(--blue-dim)}
+.city-name{font-size:.7rem;color:var(--text2)}
+.city-item.cap .city-name{color:var(--blue-light)}
+
+/* QUESTION */
+.q-card{background:var(--bg2);border-radius:var(--rl);padding:1.1rem;margin-bottom:1rem}
+.tag-food{border:1px solid var(--gold)}
+.tag-sports{border:1px solid var(--purple)}
+.tag-landmark{border:1px solid var(--green)}
+.tag-culture{border:1px solid var(--blue)}
+.tag-language{border:1px solid var(--teal)}
+.q-tags{display:flex;gap:6px;margin-bottom:.75rem;flex-wrap:wrap}
+.q-tag{font-size:.68rem;padding:3px 9px;border-radius:5px;font-weight:600}
+.qt-state{background:var(--blue-dim);color:var(--blue-light);border:1px solid var(--blue)}
+.qt-food{background:var(--gold-dim);color:var(--gold-light);border:1px solid var(--gold)}
+.qt-sports{background:var(--purple-dim);color:var(--purple-light);border:1px solid var(--purple)}
+.qt-landmark{background:var(--green-dim);color:var(--green-light);border:1px solid var(--green)}
+.qt-culture{background:var(--blue-dim);color:var(--blue-light);border:1px solid var(--blue)}
+.qt-language{background:#0d2a2a;color:#b3f0e0;border:1px solid var(--teal)}
+.q-text{font-size:.9rem;color:var(--text);line-height:1.65}
+.choices{display:flex;flex-direction:column;gap:7px;margin-bottom:1rem}
+.choice{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;font-size:.86rem;color:var(--text);text-align:left;cursor:pointer;width:100%;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:8px}
+.choice:hover{background:var(--bg3);border-color:var(--text2)}
+.choice.correct{background:var(--green-dim);border-color:var(--green);color:var(--green-light)}
+.choice.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red-light)}
+.cl{color:var(--text3);font-size:.72rem;flex-shrink:0;font-weight:600}
+
+/* FEEDBACK */
+.fb-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
+.fb-ok{font-size:.84rem;font-weight:600;color:var(--green);margin-bottom:.4rem}
+.fb-no{font-size:.84rem;font-weight:600;color:var(--red);margin-bottom:.4rem}
+.fb-txt{font-size:.84rem;color:var(--text2);line-height:1.6;margin-bottom:.6rem}
+.fact-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.6rem}
+.fp{font-size:.7rem;padding:3px 9px;border-radius:5px;border:1px solid var(--border);color:var(--text2);background:var(--bg3)}
+.links-row{display:flex;flex-wrap:wrap;gap:6px}
+.lnk{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;padding:5px 11px;border-radius:6px;border:1px solid var(--border);color:var(--text2);text-decoration:none;background:var(--bg3);transition:all .15s}
+.lnk-wiki{border-color:var(--blue);color:var(--blue-light);background:var(--blue-dim)}
+.lnk-wiki:hover{background:#2a4a7f;color:#fff;text-decoration:none}
+.lnk-maps{border-color:var(--green);color:var(--green-light);background:var(--green-dim)}
+.lnk-maps:hover{background:#1a4a2a;color:#fff;text-decoration:none}
+.lnk-team{border-color:var(--purple);color:var(--purple-light);background:var(--purple-dim)}
+.lnk-team:hover{background:#3a1a80;color:#fff;text-decoration:none}
+.sp-box{background:var(--bg2);border:1px solid var(--blue);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
+.sp-title{font-size:.7rem;color:var(--blue-light);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:.85rem}
+.team-row{display:flex;align-items:center;gap:12px;padding-bottom:.85rem;margin-bottom:.85rem;border-bottom:1px solid var(--border)}
+.team-icon{font-size:1.5rem}
+.team-name{font-size:.9rem;font-weight:600;color:var(--text)}
+.sp-section{margin-bottom:.65rem}
+.sp-lbl{font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+.say-list{display:flex;flex-direction:column;gap:6px}
+.say-item{display:flex;align-items:center;gap:8px}
+.say-text{font-size:.84rem;padding:6px 12px;border-radius:6px;background:var(--blue-dim);color:var(--blue-light);font-weight:500;flex:1}
+.say-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--blue);background:var(--blue-dim);color:var(--blue-light);cursor:pointer;font-size:.82rem;padding:0;flex-shrink:0;font-family:inherit;transition:all .15s}
+.say-btn:hover{background:var(--blue);color:#fff}
+.say-btn.on{background:var(--blue);color:#fff}
+.avoid-list{display:flex;flex-direction:column;gap:4px}
+.avoid-item{font-size:.78rem;padding:5px 10px;border-radius:6px;background:var(--red-dim);color:var(--red-light);border:1px solid var(--red)}
+.sp-note-text{font-size:.78rem;color:var(--text2);line-height:1.6}
+.cu-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
+.cu-title{font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:.65rem}
+.cu-row{margin-bottom:.5rem}
+.cu-lbl{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.cu-val{font-size:.8rem;color:var(--text);line-height:1.5}
+.lang-box{background:var(--bg2);border:1px solid #1a5a4a;border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
+.lang-title{font-size:.68rem;color:#b3f0e0;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:.85rem}
+.lang-list{display:flex;flex-direction:column;gap:8px}
+.lang-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.6rem .85rem}
+.lang-phrase{flex:1}
+.lang-native{font-size:.92rem;font-weight:600;color:var(--text)}
+.lang-meaning{font-size:.73rem;color:var(--text2);margin-top:1px}
+.lang-context{font-size:.7rem;color:#39d353;margin-top:2px}
+.next-btn{width:100%;padding:.8rem;font-size:.9rem;font-weight:600;cursor:pointer;border-radius:var(--r);border:1px solid var(--blue);background:var(--blue-dim);color:var(--blue-light);font-family:inherit;margin-bottom:.5rem;transition:all .15s}
+.next-btn:hover{background:var(--blue);color:#fff}
+.end-wrap{text-align:center;padding:3rem 1rem}
+.end-title{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--text);margin-bottom:.5rem}
+.end-sub{font-size:.88rem;color:var(--text2);line-height:1.7;margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto}
+.end-scores{display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem}
+.em{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem 2rem;text-align:center}
+.em-n{font-size:1.8rem;font-weight:700;color:var(--blue)}
+.em-l{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.end-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.replay-btn{padding:.75rem 1.75rem;font-size:.86rem;font-weight:600;cursor:pointer;border-radius:var(--r);border:1px solid var(--blue);background:var(--blue-dim);color:var(--blue-light);font-family:inherit;transition:all .15s}
+.replay-btn:hover{background:var(--blue);color:#fff}
+.home-btn{padding:.75rem 1.75rem;font-size:.86rem;font-weight:600;cursor:pointer;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;transition:all .15s}
+.home-btn:hover{color:var(--text);border-color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="homeScreen">
+  <div class="home-hero">
+    <h1>Business Culture Academy</h1>
+    <p>Master local food, landmarks, sports teams, etiquette and language — one business scenario at a time.</p>
+  </div>
+  <div class="region-grid">
+    <div class="region-card" style="--accent:#388bfd" onclick="startRegion('us')">
+      <span class="region-flag">🇺🇸</span>
+      <div class="region-title">United States</div>
+      <div class="region-sub">15 states · Food, landmarks, sports, culture</div>
+      <div class="region-countries"><span class="country-chip">Texas</span><span class="country-chip">California</span><span class="country-chip">New York</span><span class="country-chip">Florida</span><span class="country-chip">+11 more</span></div>
+    </div>
+    <div class="region-card" style="--accent:#3fb950" onclick="startRegion('asia')">
+      <span class="region-flag">🌏</span>
+      <div class="region-title">Asia Pacific</div>
+      <div class="region-sub">5 countries · Language phrases, etiquette, culture</div>
+      <div class="region-countries"><span class="country-chip">🇨🇳 China</span><span class="country-chip">🇯🇵 Japan</span><span class="country-chip">🇰🇷 South Korea</span><span class="country-chip">🇮🇳 India</span><span class="country-chip">🇦🇺 Australia</span></div>
+    </div>
+    <div class="region-card" style="--accent:#8957e5" onclick="startRegion('europe')">
+      <span class="region-flag">🌍</span>
+      <div class="region-title">Europe</div>
+      <div class="region-sub">5 countries · Business etiquette, food, landmarks</div>
+      <div class="region-countries"><span class="country-chip">🇬🇧 UK</span><span class="country-chip">🇩🇪 Germany</span><span class="country-chip">🇫🇷 France</span><span class="country-chip">🇮🇹 Italy</span><span class="country-chip">🇪🇸 Spain</span></div>
+    </div>
+    <div class="region-card coming-soon" style="--accent:#d29922">
+      <span class="soon-badge">Coming Soon</span>
+      <span class="region-flag">🌎</span>
+      <div class="region-title">Latin America</div>
+      <div class="region-sub">Mexico, Brazil, Colombia, Argentina</div>
+      <div class="region-countries"><span class="country-chip">🇲🇽 Mexico</span><span class="country-chip">🇧🇷 Brazil</span><span class="country-chip">🇨🇴 Colombia</span><span class="country-chip">🇦🇷 Argentina</span></div>
+    </div>
+    <div class="region-card coming-soon" style="--accent:#f85149">
+      <span class="soon-badge">Coming Soon</span>
+      <span class="region-flag">🕌</span>
+      <div class="region-title">Middle East & Africa</div>
+      <div class="region-sub">UAE, Saudi Arabia, South Africa, Nigeria</div>
+      <div class="region-countries"><span class="country-chip">🇦🇪 UAE</span><span class="country-chip">🇸🇦 Saudi Arabia</span><span class="country-chip">🇿🇦 South Africa</span><span class="country-chip">🇳🇬 Nigeria</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen">
+  <div class="game-nav">
+    <button class="back-btn" onclick="goHome()">← Regions</button>
+    <span class="game-title" id="gameTitle"></span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="score-grid">
+    <div class="sc"><div class="sc-n" id="scCorrect">0</div><div class="sc-l">Correct</div></div>
+    <div class="sc"><div class="sc-n" id="scDone">0</div><div class="sc-l">Done</div></div>
+    <div class="sc"><div class="sc-n" id="scLeft">10</div><div class="sc-l">Left</div></div>
+  </div>
+  <div id="mapCard" class="map-card"></div>
+  <div id="qCard"></div>
+  <div id="choicesEl"></div>
+  <div id="fbEl"></div>
+</div>
+
+<script>
+// ── PHRASE BANK ──────────────────────────────────────────────
+const PB=[];
+function rp(t){PB.push(t);return PB.length-1;}
+let curUtt=null;
+function si(i,btn,lang){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  if(curUtt&&btn.classList.contains('on')){curUtt=null;btn.classList.remove('on');btn.textContent='🔊';return;}
+  document.querySelectorAll('.spk.on,.say-btn.on').forEach(b=>{b.classList.remove('on');b.textContent='🔊';});
+  const t=PB[i];if(!t)return;
+  const u=new SpeechSynthesisUtterance(t);
+  u.rate=0.88;u.lang=lang||'en-US';curUtt=u;
+  btn.classList.add('on');btn.textContent='⏹';
+  u.onend=u.onerror=()=>{btn.classList.remove('on');btn.textContent='🔊';curUtt=null;};
+  window.speechSynthesis.speak(u);
+}
+function lnk(items){return`<div class="links-row">${items.map(l=>`<a class="lnk ${l.c}" href="${l.u}" target="_blank" rel="noopener">${l.i} ${l.l}</a>`).join('')}</div>`;}
+
+// ── US TZ COLORS (dark theme) ────────────────────────────────
+const US_TZ={Pacific:"#1a2f4a",Mountain:"#1a2e1a",Central:"#2e2200",Eastern:"#2e1600"};
+const FIPS_TZ={"01":"Eastern","04":"Mountain","05":"Central","06":"Pacific","08":"Mountain","09":"Eastern","10":"Eastern","12":"Eastern","13":"Eastern","16":"Mountain","17":"Central","18":"Eastern","19":"Central","20":"Central","21":"Eastern","22":"Central","23":"Eastern","24":"Eastern","25":"Eastern","26":"Eastern","27":"Central","28":"Central","29":"Central","30":"Mountain","31":"Central","32":"Pacific","33":"Eastern","34":"Eastern","35":"Mountain","36":"Eastern","37":"Eastern","38":"Central","39":"Eastern","40":"Central","41":"Pacific","42":"Eastern","44":"Eastern","45":"Eastern","46":"Central","47":"Central","48":"Central","49":"Mountain","50":"Eastern","51":"Eastern","53":"Pacific","54":"Eastern","55":"Central","56":"Mountain"};
+const SPORT_E={football:"🏈",basketball:"🏀",baseball:"⚾",hockey:"🏒",cricket:"🏏",rugby:"🏉",soccer:"⚽"};
+const LEAGUE_E={NFL:"🏈",NBA:"🏀",MLB:"⚾",NHL:"🏒"};
+
+// ── COUNTRY ISO NUMERIC IDs ──────────────────────────────────
+const COUNTRY_ISO={Japan:392,China:156,"South Korea":410,India:356,Australia:36,"United Kingdom":826,Germany:276,France:250,Italy:380,Spain:724};
+
+// ── US DATA ──────────────────────────────────────────────────
+const US=[
+  {s:"Texas",a:"TX",fips:"48",city:"Dallas",landmark:"the Alamo in San Antonio",lWiki:"https://en.wikipedia.org/wiki/The_Alamo",lMaps:"https://maps.google.com/?q=The+Alamo+San+Antonio",food:"BBQ brisket",fWiki:"https://en.wikipedia.org/wiki/Brisket",cap:"Austin",tz:"Central",st:"football",tFull:"Dallas Cowboys (NFL)",tName:"Dallas Cowboys",tWiki:"https://en.wikipedia.org/wiki/Dallas_Cowboys",say:["How about them Cowboys?","the Cowboys","America's Team"],avoid:["Saying the Dallas Cowboys every time — sounds like a newscaster"],note:"America's Team is their unofficial nickname. How about them Cowboys? is a Texas cultural institution.",cities:[{n:"Houston"},{n:"Dallas"},{n:"San Antonio"},{n:"Austin",c:true},{n:"Fort Worth"},{n:"El Paso"}],eco:"Energy, tech, ranching — entrepreneurial and deal-driven",rel:"Heavily Protestant (Baptist), faith openly woven into business",comm:"Direct, relationship-first — small talk before business",tip:"Don't rush to the pitch. Build rapport first.",qF:["BBQ brisket","deep-dish pizza","hot chicken","Cajun gumbo"],qT:["Dallas Cowboys (NFL)","Green Bay Packers (NFL)","Miami Dolphins (NFL)","Seattle Seahawks (NFL)"],qL:["the Alamo in San Antonio","the Gateway Arch","Mount Rushmore","Niagara Falls"],qC:["Relationship-first, direct, faith openly present","Reserved, data-driven, avoid personal topics","Fast-paced, transactional, get to the point","Formal and hierarchical, titles matter"],ctx:"a tech conference in Austin"},
+  {s:"California",a:"CA",fips:"06",city:"Los Angeles",landmark:"the Golden Gate Bridge",lWiki:"https://en.wikipedia.org/wiki/Golden_Gate_Bridge",lMaps:"https://maps.google.com/?q=Golden+Gate+Bridge+San+Francisco",food:"fish tacos",fWiki:"https://en.wikipedia.org/wiki/Fish_taco",cap:"Sacramento",tz:"Pacific",st:"basketball",tFull:"Los Angeles Lakers (NBA)",tName:"Los Angeles Lakers",tWiki:"https://en.wikipedia.org/wiki/Los_Angeles_Lakers",say:["the Lakers","Lake Show"],avoid:["Saying the Los Angeles Lakers in full — no local says the full name"],note:"SF Bay Area locals may prefer the Warriors — always worth asking.",cities:[{n:"Los Angeles"},{n:"San Francisco"},{n:"San Diego"},{n:"San Jose"},{n:"Sacramento",c:true},{n:"Fresno"}],eco:"Tech, entertainment, agriculture — innovation-obsessed, flat hierarchies",rel:"Least religious state; spiritual but not institutional",comm:"Casual, optimistic, ideas-first",tip:"Titles matter less than ideas. Lead with vision.",qF:["fish tacos","Philly cheesesteak","beignets and gumbo","clam chowder"],qT:["Los Angeles Lakers (NBA)","Boston Celtics (NBA)","Chicago Bulls (NBA)","Houston Rockets (NBA)"],qL:["the Golden Gate Bridge","the Space Needle","Hoover Dam","Independence Hall"],qC:["Casual, ideas-first, flat hierarchies","Formal and hierarchical, titles matter","Relationship-first, faith openly present","Conservative, protocol-driven, slow to trust"],ctx:"a startup pitch event"},
+  {s:"New York",a:"NY",fips:"36",city:"New York City",landmark:"the Statue of Liberty",lWiki:"https://en.wikipedia.org/wiki/Statue_of_Liberty",lMaps:"https://maps.google.com/?q=Statue+of+Liberty+New+York",food:"New York-style pizza",fWiki:"https://en.wikipedia.org/wiki/New_York-style_pizza",cap:"Albany",tz:"Eastern",st:"baseball",tFull:"New York Yankees (MLB)",tName:"New York Yankees",tWiki:"https://en.wikipedia.org/wiki/New_York_Yankees",say:["the Yanks","the Bronx Bombers","the Yankees"],avoid:["Using the full name New York Yankees in casual conversation — too formal"],note:"The Yanks is most casual. Bronx Bombers signals you really know the team. Mets fans exist — if from Queens, ask first.",cities:[{n:"New York City"},{n:"Buffalo"},{n:"Rochester"},{n:"Syracuse"},{n:"Albany",c:true},{n:"Yonkers"}],eco:"Finance, media, fashion, real estate — high-stakes and fast-moving",rel:"Highly diverse — Catholic, Jewish, Muslim, secular all prominent",comm:"Direct, fast, no-nonsense — get to the point",tip:"Skip pleasantries and lead with substance.",qF:["New York-style pizza","key lime pie","green chile","peach cobbler"],qT:["New York Yankees (MLB)","Los Angeles Dodgers (MLB)","Chicago Cubs (MLB)","Boston Red Sox (MLB)"],qL:["the Statue of Liberty","the Gateway Arch","Faneuil Hall","Stone Mountain Park"],qC:["Direct, fast-paced, lead with substance","Slow and relationship-driven","Casual and laid-back","Formal, deferential to seniority"],ctx:"a finance industry summit"},
+  {s:"Tennessee",a:"TN",fips:"47",city:"Nashville",landmark:"the Grand Ole Opry",lWiki:"https://en.wikipedia.org/wiki/Grand_Ole_Opry",lMaps:"https://maps.google.com/?q=Grand+Ole+Opry+Nashville",food:"hot chicken",fWiki:"https://en.wikipedia.org/wiki/Nashville_hot_chicken",cap:"Nashville",tz:"Central",st:"football",tFull:"Tennessee Titans (NFL)",tName:"Tennessee Titans",tWiki:"https://en.wikipedia.org/wiki/Tennessee_Titans",say:["the Titans","Two-Tone Blues"],avoid:["Saying Tennessee Titans every sentence — just say the Titans"],note:"Nashville also has the Predators in hockey — a great client outing option.",cities:[{n:"Nashville",c:true},{n:"Memphis"},{n:"Knoxville"},{n:"Chattanooga"},{n:"Clarksville"}],eco:"Music, healthcare, manufacturing, tourism",rel:"Deep Bible Belt — Southern Baptist dominant",comm:"Warm, hospitable, indirect — relationships before transactions",tip:"Slow down. Accept the hospitality. Rushing is rude.",qF:["hot chicken","key lime pie","deep-dish pizza","BBQ brisket"],qT:["Tennessee Titans (NFL)","Carolina Panthers (NFL)","Atlanta Falcons (NFL)","Indianapolis Colts (NFL)"],qL:["the Grand Ole Opry","Stone Mountain Park","Everglades National Park","the French Quarter"],qC:["Warm, hospitality-first, faith assumed shared","Blunt and transactional","Secular and casual","Hierarchical, formal"],ctx:"a music industry networking event"},
+  {s:"Louisiana",a:"LA",fips:"22",city:"New Orleans",landmark:"the French Quarter",lWiki:"https://en.wikipedia.org/wiki/French_Quarter",lMaps:"https://maps.google.com/?q=French+Quarter+New+Orleans",food:"beignets and gumbo",fWiki:"https://en.wikipedia.org/wiki/Beignet",cap:"Baton Rouge",tz:"Central",st:"football",tFull:"New Orleans Saints (NFL)",tName:"New Orleans Saints",tWiki:"https://en.wikipedia.org/wiki/New_Orleans_Saints",say:["the Saints","the Black and Gold","Who Dat?"],avoid:["Anything that sounds like you pity them — Saints fans are fiercely proud"],note:"Who Dat is the battle cry — if a local says it, respond Who Dat back.",cities:[{n:"New Orleans"},{n:"Baton Rouge",c:true},{n:"Shreveport"},{n:"Lafayette"},{n:"Lake Charles"}],eco:"Tourism, oil and gas, shipping, food — unique Creole culture",rel:"Predominantly Catholic — only majority-Catholic state in the South",comm:"Festive, storytelling-oriented — food and music are social currency",tip:"Ask about food and music genuinely. The Saints are civic pride.",qF:["beignets and gumbo","Philly cheesesteak","fish tacos","hot chicken"],qT:["New Orleans Saints (NFL)","Jacksonville Jaguars (NFL)","Tampa Bay Buccaneers (NFL)","Carolina Panthers (NFL)"],qL:["the French Quarter","Stone Mountain Park","the Grand Ole Opry","the Las Vegas Strip"],qC:["Festive, storytelling-driven, food is social currency","Reserved, data-first","Formal and hierarchical","Casual and transactional"],ctx:"a hospitality industry conference"},
+  {s:"Illinois",a:"IL",fips:"17",city:"Chicago",landmark:"Millennium Park and Cloud Gate",lWiki:"https://en.wikipedia.org/wiki/Cloud_Gate",lMaps:"https://maps.google.com/?q=Cloud+Gate+Millennium+Park+Chicago",food:"deep-dish pizza",fWiki:"https://en.wikipedia.org/wiki/Chicago-style_pizza",cap:"Springfield",tz:"Central",st:"basketball",tFull:"Chicago Bulls (NBA)",tName:"Chicago Bulls",tWiki:"https://en.wikipedia.org/wiki/Chicago_Bulls",say:["the Bulls","Da Bulls"],avoid:["Overdoing the Da Bulls accent — it is a reference, not your actual accent"],note:"Cubs North Side vs White Sox South Side loyalty is tribal — always ask which side.",cities:[{n:"Chicago"},{n:"Aurora"},{n:"Rockford"},{n:"Joliet"},{n:"Springfield",c:true},{n:"Naperville"}],eco:"Finance, manufacturing, logistics — Midwest work ethic",rel:"Catholic and mainline Protestant; religion stays private",comm:"Straightforward, unpretentious — Midwestern nice but business-focused",tip:"Don't oversell. Chicagoans respect substance over flash.",qF:["deep-dish pizza","BBQ brisket","clam chowder","beignets and gumbo"],qT:["Chicago Bulls (NBA)","Detroit Pistons (NBA)","Milwaukee Bucks (NBA)","Indiana Pacers (NBA)"],qL:["Millennium Park and Cloud Gate","the Gateway Arch","Motown Museum","the Alamo in San Antonio"],qC:["Straightforward, unpretentious, substance over flash","Relationship-first, faith openly present","Fast-paced and blunt","Casual and optimistic"],ctx:"a manufacturing trade show"},
+  {s:"Florida",a:"FL",fips:"12",city:"Miami",landmark:"Everglades National Park",lWiki:"https://en.wikipedia.org/wiki/Everglades_National_Park",lMaps:"https://maps.google.com/?q=Everglades+National+Park+Florida",food:"key lime pie",fWiki:"https://en.wikipedia.org/wiki/Key_lime_pie",cap:"Tallahassee",tz:"Eastern",st:"basketball",tFull:"Miami Heat (NBA)",tName:"Miami Heat",tWiki:"https://en.wikipedia.org/wiki/Miami_Heat",say:["the Heat","Heatnation"],avoid:["Saying the Miami Heat in full — just say the Heat"],note:"If they are from Tampa, they likely follow the Buccaneers or Lightning instead.",cities:[{n:"Miami"},{n:"Orlando"},{n:"Tampa"},{n:"Jacksonville"},{n:"Fort Lauderdale"},{n:"Tallahassee",c:true}],eco:"Tourism, real estate, healthcare, Latin American trade hub",rel:"Diverse — Catholic especially Cuban-American, evangelical, secular",comm:"Energetic, multicultural — Miami is bilingual",tip:"Latin business culture values personal relationship heavily.",qF:["key lime pie","deep-dish pizza","hot chicken","Philly cheesesteak"],qT:["Miami Heat (NBA)","Orlando Magic (NBA)","Charlotte Hornets (NBA)","Atlanta Hawks (NBA)"],qL:["Everglades National Park","the Las Vegas Strip","Stone Mountain Park","the French Quarter"],qC:["Multicultural, relationship-driven, bilingual in Miami","Reserved and formal","Casual and transactional","Faith-centered, slow-paced"],ctx:"a real estate investment summit"},
+  {s:"Pennsylvania",a:"PA",fips:"42",city:"Philadelphia",landmark:"Independence Hall",lWiki:"https://en.wikipedia.org/wiki/Independence_Hall",lMaps:"https://maps.google.com/?q=Independence+Hall+Philadelphia",food:"Philly cheesesteak",fWiki:"https://en.wikipedia.org/wiki/Cheesesteak",cap:"Harrisburg",tz:"Eastern",st:"football",tFull:"Philadelphia Eagles (NFL)",tName:"Philadelphia Eagles",tWiki:"https://en.wikipedia.org/wiki/Philadelphia_Eagles",say:["the Eagles","the Birds","E-A-G-L-E-S Eagles!"],avoid:["Saying the Philadelphia Eagles — way too formal"],note:"The Birds is the insider shorthand. Spelling out E-A-G-L-E-S Eagles with enthusiasm is an instant bonding moment.",cities:[{n:"Philadelphia"},{n:"Pittsburgh"},{n:"Allentown"},{n:"Erie"},{n:"Harrisburg",c:true},{n:"Reading"}],eco:"Healthcare, education, finance, manufacturing",rel:"Catholic, mainline Protestant, large Jewish community",comm:"Direct and proud — strong civic identity",tip:"Acknowledge the Eagles sincerely and you earn respect fast.",qF:["Philly cheesesteak","key lime pie","fish tacos","BBQ brisket"],qT:["Philadelphia Eagles (NFL)","New York Giants (NFL)","Washington Commanders (NFL)","Dallas Cowboys (NFL)"],qL:["Independence Hall","the Statue of Liberty","Faneuil Hall","the Gateway Arch"],qC:["Direct, proud civic identity, not easily impressed","Warm and hospitable","Casual and optimistic","Hierarchical, deferential to titles"],ctx:"a healthcare industry conference"},
+  {s:"Washington",a:"WA",fips:"53",city:"Seattle",landmark:"the Space Needle",lWiki:"https://en.wikipedia.org/wiki/Space_Needle",lMaps:"https://maps.google.com/?q=Space+Needle+Seattle",food:"fresh salmon",fWiki:"https://en.wikipedia.org/wiki/Salmon_as_food",cap:"Olympia",tz:"Pacific",st:"football",tFull:"Seattle Seahawks (NFL)",tName:"Seattle Seahawks",tWiki:"https://en.wikipedia.org/wiki/Seattle_Seahawks",say:["the Hawks","the Seahawks","the 12s"],avoid:["Confusing them with the Atlanta Hawks — totally different sport"],note:"The 12s refers to the fans — known as the loudest in the NFL. The Kraken in hockey are new and very popular.",cities:[{n:"Seattle"},{n:"Spokane"},{n:"Tacoma"},{n:"Bellevue"},{n:"Redmond"},{n:"Olympia",c:true}],eco:"Tech, aerospace, coffee, maritime — Amazon and Boeing define the economy",rel:"One of the least religious states — secular norms dominate",comm:"Reserved, thoughtful, progressive",tip:"Coffee culture is real — asking about a local spot is always a winner.",qF:["fresh salmon","hot chicken","beignets and gumbo","deep-dish pizza"],qT:["Seattle Seahawks (NFL)","San Francisco 49ers (NFL)","Los Angeles Rams (NFL)","Las Vegas Raiders (NFL)"],qL:["the Space Needle","the Golden Gate Bridge","Rocky Mountain National Park","Everglades National Park"],qC:["Reserved, thoughtful, secular norms dominate","Warm and faith-forward","Fast-paced and blunt","Festive and storytelling-driven"],ctx:"an aerospace industry gathering"},
+  {s:"Colorado",a:"CO",fips:"08",city:"Denver",landmark:"Rocky Mountain National Park",lWiki:"https://en.wikipedia.org/wiki/Rocky_Mountain_National_Park",lMaps:"https://maps.google.com/?q=Rocky+Mountain+National+Park",food:"green chile",fWiki:"https://en.wikipedia.org/wiki/New_Mexico_chile",cap:"Denver",tz:"Mountain",st:"football",tFull:"Denver Broncos (NFL)",tName:"Denver Broncos",tWiki:"https://en.wikipedia.org/wiki/Denver_Broncos",say:["the Broncos","Orange Crush"],avoid:["Saying Denver Broncos every time — just say the Broncos"],note:"Orange Crush is from their dominant 1970s defense. Denver also has the Nuggets and Avalanche.",cities:[{n:"Denver",c:true},{n:"Colorado Springs"},{n:"Aurora"},{n:"Fort Collins"},{n:"Boulder"},{n:"Pueblo"}],eco:"Aerospace, tech, outdoor recreation — outdoor lifestyle is identity",rel:"Moderately religious; evangelical in Colorado Springs, secular in Denver",comm:"Active, casual, egalitarian — work-life balance genuinely valued",tip:"Outdoor activity is the universal conversation topic.",qF:["green chile","key lime pie","Philly cheesesteak","fresh salmon"],qT:["Denver Broncos (NFL)","Kansas City Chiefs (NFL)","Las Vegas Raiders (NFL)","Los Angeles Chargers (NFL)"],qL:["Rocky Mountain National Park","the Grand Canyon","the Space Needle","Faneuil Hall"],qC:["Active, casual, outdoor lifestyle is identity","Formal, hierarchical","Faith-centered, hospitality-driven","Blunt and transactional"],ctx:"an outdoor industry trade show"},
+  {s:"Georgia",a:"GA",fips:"13",city:"Atlanta",landmark:"Stone Mountain Park",lWiki:"https://en.wikipedia.org/wiki/Stone_Mountain",lMaps:"https://maps.google.com/?q=Stone+Mountain+Park+Georgia",food:"peach cobbler",fWiki:"https://en.wikipedia.org/wiki/Cobbler_(food)",cap:"Atlanta",tz:"Eastern",st:"baseball",tFull:"Atlanta Braves (MLB)",tName:"Atlanta Braves",tWiki:"https://en.wikipedia.org/wiki/Atlanta_Braves",say:["the Braves","doing the Tomahawk Chop"],avoid:["Saying Atlanta Braves in full — just say the Braves"],note:"The Tomahawk Chop is their iconic fan chant — doing it with a Braves fan is instant bonding.",cities:[{n:"Atlanta",c:true},{n:"Augusta"},{n:"Savannah"},{n:"Columbus"},{n:"Macon"},{n:"Athens"}],eco:"Logistics, film, tech, agriculture — Atlanta is the business capital of the South",rel:"Baptist and evangelical dominant — buckle of the Bible Belt",comm:"Warm, formal by Southern standards — hospitality is genuine",tip:"Southern hospitality is real — reciprocate it.",qF:["peach cobbler","deep-dish pizza","clam chowder","green chile"],qT:["Atlanta Braves (MLB)","Tampa Bay Rays (MLB)","Miami Marlins (MLB)","Washington Nationals (MLB)"],qL:["Stone Mountain Park","the Grand Ole Opry","Everglades National Park","the French Quarter"],qC:["Warm, hospitable, faith is woven into culture","Secular and fast-paced","Reserved and data-driven","Casual and egalitarian"],ctx:"a logistics and supply chain summit"},
+  {s:"Massachusetts",a:"MA",fips:"25",city:"Boston",landmark:"Faneuil Hall",lWiki:"https://en.wikipedia.org/wiki/Faneuil_Hall",lMaps:"https://maps.google.com/?q=Faneuil+Hall+Boston",food:"clam chowder",fWiki:"https://en.wikipedia.org/wiki/Clam_chowder",cap:"Boston",tz:"Eastern",st:"baseball",tFull:"Boston Red Sox (MLB)",tName:"Boston Red Sox",tWiki:"https://en.wikipedia.org/wiki/Boston_Red_Sox",say:["the Sox","the Red Sox","BoSox"],avoid:["Rooting for the Yankees — the one unforgivable act in Boston"],note:"Boston has the Red Sox, Patriots, Celtics, and Bruins — all beloved.",cities:[{n:"Boston",c:true},{n:"Worcester"},{n:"Cambridge"},{n:"Lowell"},{n:"Springfield"},{n:"New Bedford"}],eco:"Biotech, education, finance, healthcare — elite academics shape culture",rel:"Catholic historically; increasingly secular among young professionals",comm:"Intellectual, proud, occasionally blunt — credentials matter",tip:"Harvard and MIT references come up often. Never root for the Yankees.",qF:["clam chowder","hot chicken","key lime pie","fish tacos"],qT:["Boston Red Sox (MLB)","New York Yankees (MLB)","Toronto Blue Jays (MLB)","Baltimore Orioles (MLB)"],qL:["Faneuil Hall","the Statue of Liberty","Independence Hall","the Grand Ole Opry"],qC:["Intellectual, credential-aware, sports loyalty intense","Warm and faith-forward","Casual and optimistic","Festive, multicultural"],ctx:"a biotech conference"},
+  {s:"Nevada",a:"NV",fips:"32",city:"Las Vegas",landmark:"the Las Vegas Strip",lWiki:"https://en.wikipedia.org/wiki/Las_Vegas_Strip",lMaps:"https://maps.google.com/?q=Las+Vegas+Strip",food:"prime rib buffet",fWiki:"https://en.wikipedia.org/wiki/Prime_rib",cap:"Carson City",tz:"Pacific",st:"football",tFull:"Las Vegas Raiders (NFL)",tName:"Las Vegas Raiders",tWiki:"https://en.wikipedia.org/wiki/Las_Vegas_Raiders",say:["the Raiders","the Silver and Black","Raider Nation"],avoid:["Assuming people in Vegas did not care about sports before the Raiders arrived"],note:"The Vegas Golden Knights in hockey arrived first and have a massive devoted following.",cities:[{n:"Las Vegas"},{n:"Henderson"},{n:"Reno"},{n:"North Las Vegas"},{n:"Carson City",c:true},{n:"Sparks"}],eco:"Tourism, hospitality, conventions, gaming — transient workforce",rel:"Less religious than national average",comm:"Transactional, fast, entertainment-oriented",tip:"Stand out by being genuine and less salesy than everyone else.",qF:["prime rib buffet","clam chowder","peach cobbler","BBQ brisket"],qT:["Las Vegas Raiders (NFL)","Los Angeles Chargers (NFL)","Denver Broncos (NFL)","Kansas City Chiefs (NFL)"],qL:["the Las Vegas Strip","Rocky Mountain National Park","the Grand Canyon","Everglades National Park"],qC:["Transactional, fast, entertainment-driven","Warm and faith-forward","Intellectual and credential-aware","Reserved, thoughtful, secular"],ctx:"an entertainment tech expo"},
+  {s:"Michigan",a:"MI",fips:"26",city:"Detroit",landmark:"Motown Museum",lWiki:"https://en.wikipedia.org/wiki/Motown_Museum",lMaps:"https://maps.google.com/?q=Motown+Museum+Detroit",food:"Coney Island hot dog",fWiki:"https://en.wikipedia.org/wiki/Coney_Island_hot_dog",cap:"Lansing",tz:"Eastern",st:"football",tFull:"Detroit Lions (NFL)",tName:"Detroit Lions",tWiki:"https://en.wikipedia.org/wiki/Detroit_Lions",say:["the Lions","Honolulu Blue","the Pride"],avoid:["Pitying them — Lions fans are proud and the team has turned a corner"],note:"Detroit also has the Red Wings in hockey — legendary — and the Tigers in baseball.",cities:[{n:"Detroit"},{n:"Grand Rapids"},{n:"Warren"},{n:"Ann Arbor"},{n:"Sterling Heights"},{n:"Lansing",c:true}],eco:"Auto manufacturing, tech startups, healthcare — proud comeback mode",rel:"Catholic, Baptist, large Arab-American Muslim community in Dearborn",comm:"Hardworking, unpretentious, loyal — Detroit pride is deep and real",tip:"Don't treat Detroit as a declining city — locals are fiercely proud.",qF:["Coney Island hot dog","fresh salmon","beignets and gumbo","green chile"],qT:["Detroit Lions (NFL)","Chicago Bears (NFL)","Minnesota Vikings (NFL)","Green Bay Packers (NFL)"],qL:["Motown Museum","the Gateway Arch","Millennium Park and Cloud Gate","Independence Hall"],qC:["Hardworking, unpretentious, deep civic pride","Casual and optimistic","Festive and storytelling-driven","Formal and hierarchical"],ctx:"an automotive industry conference"},
+  {s:"Arizona",a:"AZ",fips:"04",city:"Phoenix",landmark:"the Grand Canyon",lWiki:"https://en.wikipedia.org/wiki/Grand_Canyon",lMaps:"https://maps.google.com/?q=Grand+Canyon+Arizona",food:"Sonoran hot dog",fWiki:"https://en.wikipedia.org/wiki/Sonoran_hot_dog",cap:"Phoenix",tz:"Mountain",st:"basketball",tFull:"Phoenix Suns (NBA)",tName:"Phoenix Suns",tWiki:"https://en.wikipedia.org/wiki/Phoenix_Suns",say:["the Suns","Valley of the Sun","Suns in 4"],avoid:["Saying Phoenix Suns every time — just say the Suns"],note:"Arizona also has the Cardinals in football. Valley of the Sun shows geographic awareness locals appreciate.",cities:[{n:"Phoenix",c:true},{n:"Tucson"},{n:"Mesa"},{n:"Chandler"},{n:"Scottsdale"},{n:"Tempe"}],eco:"Real estate, tech, retiree economy, solar energy — Sun Belt boom state",rel:"Evangelical and Mormon notable; diverse with large Hispanic Catholic population",comm:"Casual, growth-oriented, newcomer-friendly",tip:"Phoenix is full of people from somewhere else — being new here is normal.",qF:["Sonoran hot dog","clam chowder","peach cobbler","Coney Island hot dog"],qT:["Phoenix Suns (NBA)","Utah Jazz (NBA)","Denver Nuggets (NBA)","Sacramento Kings (NBA)"],qL:["the Grand Canyon","Rocky Mountain National Park","the Las Vegas Strip","Everglades National Park"],qC:["Casual, newcomer-friendly, growth-oriented","Reserved and intellectual","Warm and faith-forward","Transactional and fast"],ctx:"a solar energy summit"},
+];
+
+// ── INTERNATIONAL DATA ───────────────────────────────────────
+const INTL=[
+  // ASIA
+  {s:"Japan",flag:"🇯🇵",iso:392,region:"asia",city:"Tokyo",landmark:"Mount Fuji",lWiki:"https://en.wikipedia.org/wiki/Mount_Fuji",lMaps:"https://maps.google.com/?q=Mount+Fuji+Japan",food:"sushi and ramen",fWiki:"https://en.wikipedia.org/wiki/Sushi",cap:"Tokyo",tz:"JST (UTC+9)",st:"baseball",tFull:"Yomiuri Giants (NPB)",tName:"Yomiuri Giants",tWiki:"https://en.wikipedia.org/wiki/Yomiuri_Giants",say:["the Giants","Yomiuri"],avoid:["Assuming they watch American baseball — Japanese baseball is its own beloved institution"],note:"Baseball is Japan's most popular spectator sport. The Yomiuri Giants are the most famous team — like the Yankees of Japan.",cities:[{n:"Tokyo",c:true},{n:"Osaka"},{n:"Kyoto"},{n:"Hiroshima"},{n:"Yokohama"},{n:"Nagoya"}],eco:"Manufacturing, technology, automotive — Toyota, Sony, Honda are national icons",rel:"Shinto and Buddhist blend; religion is private and rarely discussed in business",comm:"Indirect, consensus-driven — silence means thinking, not disagreement",tip:"Exchange business cards (meishi) with two hands and a slight bow. Never write on a business card.",langs:[{native:"よろしくお願いします",romaji:"Yoroshiku onegaishimasu",meaning:"I look forward to working with you",context:"Essential business greeting after any introduction",lang:"ja-JP"},{native:"ありがとうございます",romaji:"Arigatou gozaimasu",meaning:"Thank you very much",context:"Formal thank you — always use in business settings",lang:"ja-JP"},{native:"はじめまして",romaji:"Hajimemashite",meaning:"Nice to meet you (first time)",context:"First meeting only — sets a respectful tone immediately",lang:"ja-JP"}],etiq:{greet:"Bow slightly. The deeper the bow, the more respect.",avoid:"Never tip — it can be considered insulting.",gift:"Gifts are opened privately, not in front of the giver."},qF:["sushi and ramen","dim sum","kimchi","curry"],qL:["Mount Fuji","the Great Wall of China","Gyeongbokgung Palace","the Taj Mahal"],qC:["Indirect, consensus-driven, silence means thinking","Direct and blunt, get to the point fast","Expressive, relationship-first, loud negotiation","Casual, egalitarian, first names immediately"],ctx:"a technology summit in Tokyo"},
+  {s:"China",flag:"🇨🇳",iso:156,region:"asia",city:"Beijing",landmark:"the Great Wall of China",lWiki:"https://en.wikipedia.org/wiki/Great_Wall_of_China",lMaps:"https://maps.google.com/?q=Great+Wall+of+China",food:"Peking duck",fWiki:"https://en.wikipedia.org/wiki/Peking_duck",cap:"Beijing",tz:"CST (UTC+8)",st:"basketball",tFull:"CBA (Chinese Basketball Association)",tName:"CBA League",tWiki:"https://en.wikipedia.org/wiki/Chinese_Basketball_Association",say:["the CBA","Chinese basketball"],avoid:["Assuming they only follow the NBA — the CBA has massive domestic followership"],note:"Basketball is hugely popular. Yao Ming is a national icon. Football (soccer) is also passionately followed.",cities:[{n:"Beijing",c:true},{n:"Shanghai"},{n:"Guangzhou"},{n:"Shenzhen"},{n:"Chengdu"},{n:"Hangzhou"}],eco:"Manufacturing, tech, e-commerce — Alibaba, Tencent, Huawei define the modern economy",rel:"Buddhism, Taoism, Confucian values; hierarchy is paramount",comm:"Relationship (guanxi) is everything — business happens after trust is built",tip:"Building guanxi takes time. Banquets and toasting are how trust is established. Never refuse a toast.",langs:[{native:"你好",romaji:"Ni hao",meaning:"Hello",context:"Universal greeting — always appropriate",lang:"zh-CN"},{native:"谢谢",romaji:"Xie xie",meaning:"Thank you",context:"Works everywhere — locals appreciate the effort",lang:"zh-CN"},{native:"干杯",romaji:"Gan bei",meaning:"Cheers — drain your glass",context:"Said at banquets — shows you are participating in relationship-building",lang:"zh-CN"}],etiq:{greet:"Handshake is standard. Address by title and surname.",avoid:"Never discuss Taiwan, Tibet, or politics.",gift:"Avoid clocks as gifts — they symbolize death."},qF:["Peking duck","sushi and ramen","kimchi","curry"],qL:["the Great Wall of China","Mount Fuji","the Taj Mahal","Gyeongbokgung Palace"],qC:["Relationship-first, hierarchy matters, guanxi is everything","Direct and transactional, no time for small talk","Consensus-driven, indirect communication","Casual and egalitarian, first names immediately"],ctx:"a trade summit in Shanghai"},
+  {s:"South Korea",flag:"🇰🇷",iso:410,region:"asia",city:"Seoul",landmark:"Gyeongbokgung Palace",lWiki:"https://en.wikipedia.org/wiki/Gyeongbokgung",lMaps:"https://maps.google.com/?q=Gyeongbokgung+Palace+Seoul",food:"Korean BBQ and kimchi",fWiki:"https://en.wikipedia.org/wiki/Korean_barbecue",cap:"Seoul",tz:"KST (UTC+9)",st:"baseball",tFull:"Samsung Lions (KBO)",tName:"Samsung Lions",tWiki:"https://en.wikipedia.org/wiki/Samsung_Lions",say:["the Lions","Samsung Lions"],avoid:["Ignoring K-pop and Korean culture — it is a massive point of national pride"],note:"Baseball (KBO) is the most popular sport. K-pop and K-drama are equally powerful conversation topics.",cities:[{n:"Seoul",c:true},{n:"Busan"},{n:"Incheon"},{n:"Daegu"},{n:"Daejeon"},{n:"Gwangju"}],eco:"Electronics, shipbuilding, K-culture exports — Samsung, LG, Hyundai are national champions",rel:"Christianity (Protestant) and Buddhism; Confucian values shape hierarchy",comm:"Hierarchical and formal — age and seniority determine speaking order",tip:"Koreans work hard and expect dedication. K-pop is a universal icebreaker.",langs:[{native:"안녕하세요",romaji:"Annyeonghaseyo",meaning:"Hello (formal)",context:"Always use formal greeting in business",lang:"ko-KR"},{native:"감사합니다",romaji:"Gamsahamnida",meaning:"Thank you (formal)",context:"Shows respect — always use in business settings",lang:"ko-KR"},{native:"반갑습니다",romaji:"Bangapseumnida",meaning:"Nice to meet you",context:"First meeting — paired with a slight bow",lang:"ko-KR"}],etiq:{greet:"Bow when greeting. Handshake common — support your right elbow with your left hand.",avoid:"Never write someone's name in red ink — it symbolizes death.",gift:"Present and receive gifts with both hands."},qF:["Korean BBQ and kimchi","sushi and ramen","Peking duck","curry"],qL:["Gyeongbokgung Palace","the Great Wall of China","Mount Fuji","the Taj Mahal"],qC:["Hierarchical, formal, age and seniority determine speaking order","Casual and egalitarian, very direct","Consensus-driven, formal, silent when thinking","Relationship-first, loud and expressive"],ctx:"a technology conference in Seoul"},
+  {s:"India",flag:"🇮🇳",iso:356,region:"asia",city:"Mumbai",landmark:"the Taj Mahal",lWiki:"https://en.wikipedia.org/wiki/Taj_Mahal",lMaps:"https://maps.google.com/?q=Taj+Mahal+Agra+India",food:"biryani and curry",fWiki:"https://en.wikipedia.org/wiki/Biryani",cap:"New Delhi",tz:"IST (UTC+5:30)",st:"cricket",tFull:"India National Cricket Team",tName:"Team India",tWiki:"https://en.wikipedia.org/wiki/India_national_cricket_team",say:["Team India","the Men in Blue","cricket"],avoid:["Talking about cricket without enthusiasm — in India it is not just a sport, it is a religion"],note:"Cricket is the national obsession. The IPL is one of the most watched sporting events in the world.",cities:[{n:"Mumbai"},{n:"Delhi",c:true},{n:"Bangalore"},{n:"Chennai"},{n:"Hyderabad"},{n:"Pune"}],eco:"IT services, pharmaceuticals, finance — Tata, Infosys, Reliance are pillars",rel:"Hindu majority; also Muslim, Sikh, Christian, Jain — religion is very present in daily life",comm:"Hierarchical but warm — relationships are crucial, direct refusal is rare",tip:"A head wobble can mean yes or understanding — not disagreement. Never decline food outright.",langs:[{native:"नमस्ते",romaji:"Namaste",meaning:"Hello — I bow to the divine in you",context:"Universal greeting with hands pressed together — deeply respected",lang:"hi-IN"},{native:"धन्यवाद",romaji:"Dhanyavaad",meaning:"Thank you",context:"Formal thank you in Hindi — appreciated even if English is used",lang:"hi-IN"},{native:"आप कैसे हैं?",romaji:"Aap kaise hain?",meaning:"How are you? (formal)",context:"Shows respect and genuine interest",lang:"hi-IN"}],etiq:{greet:"Namaste with hands pressed together. Handshake also common.",avoid:"Never touch someone's head. Left hand is considered unclean.",gift:"Avoid leather gifts. Sweets and fruit are always safe."},qF:["biryani and curry","Korean BBQ","Peking duck","sushi"],qL:["the Taj Mahal","the Great Wall of China","Mount Fuji","Gyeongbokgung Palace"],qC:["Hierarchical but warm, relationships crucial, direct refusal is rare","Casual and egalitarian, very direct","Consensus-driven, formal, silent when thinking","Transactional, fast, time is money"],ctx:"a technology outsourcing conference in Bangalore"},
+  {s:"Australia",flag:"🇦🇺",iso:36,region:"asia",city:"Sydney",landmark:"the Sydney Opera House",lWiki:"https://en.wikipedia.org/wiki/Sydney_Opera_House",lMaps:"https://maps.google.com/?q=Sydney+Opera+House+Australia",food:"meat pie and Tim Tams",fWiki:"https://en.wikipedia.org/wiki/Australian_meat_pie",cap:"Canberra",tz:"AEST (UTC+10)",st:"rugby",tFull:"Wallabies (Rugby Union)",tName:"The Wallabies",tWiki:"https://en.wikipedia.org/wiki/Australia_national_rugby_union_team",say:["the Wallabies","the Aussies"],avoid:["Confusing Australian Rules Football with rugby — they are completely different sports"],note:"AFL dominates in Melbourne and Adelaide. Rugby League rules in Sydney and Brisbane. Cricket is a national passion.",cities:[{n:"Sydney"},{n:"Melbourne"},{n:"Brisbane"},{n:"Perth"},{n:"Adelaide"},{n:"Canberra",c:true}],eco:"Mining, agriculture, finance, tourism — rich in natural resources",rel:"Predominantly Christian but highly secular in practice",comm:"Casual, direct, egalitarian — tall poppy syndrome means avoid bragging",tip:"Australians value humor and directness. Buying a round of drinks shows you are a team player.",langs:[{native:"G'day mate",romaji:"G'day mate",meaning:"Good day, friend",context:"Classic Aussie greeting — using it shows cultural awareness and gets a laugh",lang:"en-AU"},{native:"No worries",romaji:"No worries",meaning:"That is fine — You are welcome",context:"Universal positive response — Australians use it constantly",lang:"en-AU"},{native:"She'll be right",romaji:"She'll be right",meaning:"Everything will be okay",context:"Shows laid-back optimism — signals you understand the culture",lang:"en-AU"}],etiq:{greet:"Firm handshake. First names immediately — titles feel pretentious.",avoid:"Never brag about wealth or status — tall poppy syndrome is real.",gift:"Not a strong gift culture. A bottle of good wine is always appropriate."},qF:["meat pie and Tim Tams","sushi and ramen","curry","Korean BBQ"],qL:["the Sydney Opera House","Mount Fuji","the Great Wall of China","the Taj Mahal"],qC:["Casual, direct, egalitarian — tall poppy syndrome, avoid bragging","Hierarchical, formal, titles and seniority matter","Relationship-first, consensus-driven, indirect","Transactional, fast, everyone is selling something"],ctx:"a mining industry conference in Perth"},
+  // EUROPE
+  {s:"United Kingdom",flag:"🇬🇧",iso:826,region:"europe",city:"London",landmark:"Big Ben and the Houses of Parliament",lWiki:"https://en.wikipedia.org/wiki/Big_Ben",lMaps:"https://maps.google.com/?q=Big+Ben+London+UK",food:"fish and chips",fWiki:"https://en.wikipedia.org/wiki/Fish_and_chips",cap:"London",tz:"GMT (UTC+0)",st:"soccer",tFull:"Premier League Football",tName:"The Premier League",tWiki:"https://en.wikipedia.org/wiki/Premier_League",say:["football","the Premier League","the Prem"],avoid:["Calling it soccer — in the UK it is always football, never soccer"],note:"Football loyalty in the UK is intensely tribal. Always ask which club they support. The Premier League is the most watched league in the world.",cities:[{n:"London",c:true},{n:"Manchester"},{n:"Birmingham"},{n:"Edinburgh"},{n:"Glasgow"},{n:"Liverpool"}],eco:"Finance, creative industries, pharmaceuticals — the City of London is Europe's financial hub",rel:"Nominally Christian but highly secular; religion is very private",comm:"Indirect, understated, polite — British understatement means criticism is wrapped in politeness",tip:"Self-deprecating humor is a bonding tool. Pub culture is essential to relationship-building.",langs:[{native:"Cheers",romaji:"Cheers",meaning:"Thank you — Toast — Goodbye",context:"Versatile British expression — works as thanks, a toast, or a friendly farewell",lang:"en-GB"},{native:"Brilliant",romaji:"Brilliant",meaning:"Excellent — That is great",context:"Common positive expression — using it signals cultural awareness",lang:"en-GB"},{native:"Lovely to meet you",romaji:"Lovely to meet you",meaning:"Very nice to meet you",context:"Warmer than Nice to meet you — British standard at first meetings",lang:"en-GB"}],etiq:{greet:"Firm handshake. Titles used formally but first names come quickly.",avoid:"Avoid discussing class, money, or the Royal Family unless they bring it up.",gift:"Not a strong gift culture in business. Quality and subtlety matter."},qF:["fish and chips","croissants","bratwurst","paella"],qL:["Big Ben and the Houses of Parliament","the Eiffel Tower","Neuschwanstein Castle","the Colosseum"],qC:["Indirect, understated, polite — criticism is wrapped in politeness","Very direct, efficient, titles matter","Expressive, relationship-first, loud at negotiation","Casual, egalitarian, humor-forward"],ctx:"a financial services conference in London"},
+  {s:"Germany",flag:"🇩🇪",iso:276,region:"europe",city:"Berlin",landmark:"the Brandenburg Gate",lWiki:"https://en.wikipedia.org/wiki/Brandenburg_Gate",lMaps:"https://maps.google.com/?q=Brandenburg+Gate+Berlin",food:"bratwurst and pretzels",fWiki:"https://en.wikipedia.org/wiki/Bratwurst",cap:"Berlin",tz:"CET (UTC+1)",st:"soccer",tFull:"Bundesliga Football",tName:"Die Bundesliga",tWiki:"https://en.wikipedia.org/wiki/Bundesliga",say:["the Bundesliga","die Mannschaft (national team)","football"],avoid:["Calling it soccer — football is the universal term in Germany"],note:"Football is the national sport. Bayern Munich is the dominant club. The national team is called die Mannschaft.",cities:[{n:"Berlin",c:true},{n:"Munich"},{n:"Hamburg"},{n:"Frankfurt"},{n:"Cologne"},{n:"Stuttgart"}],eco:"Automotive, engineering, manufacturing — BMW, Mercedes, Siemens define German industry",rel:"Christian (Catholic and Protestant); increasingly secular, religion stays private",comm:"Direct, efficient, punctual — German directness is not rudeness, it is respect",tip:"Germans respect expertise and preparation. Come with data, not just ideas. Punctuality is non-negotiable.",langs:[{native:"Guten Tag",romaji:"Guten Tag",meaning:"Good day (formal greeting)",context:"Standard business greeting — use until invited to use first names",lang:"de-DE"},{native:"Danke schon",romaji:"Danke schon",meaning:"Thank you very much",context:"Shows appreciation — always use in formal settings",lang:"de-DE"},{native:"Prost",romaji:"Prost",meaning:"Cheers",context:"Said when toasting — make eye contact when you say it",lang:"de-DE"}],etiq:{greet:"Firm handshake. Use Herr or Frau plus surname until invited otherwise.",avoid:"Never be late. Never push for a first-name basis before they invite it.",gift:"Wine or quality chocolates are appropriate."},qF:["bratwurst and pretzels","fish and chips","croissants","paella"],qL:["the Brandenburg Gate","Big Ben","the Eiffel Tower","the Colosseum"],qC:["Direct, efficient, punctual — directness is respect not rudeness","Indirect, wrapped in politeness and humor","Relationship-first, expressive, flexible with time","Casual, egalitarian, humor is a bonding tool"],ctx:"an automotive industry conference in Munich"},
+  {s:"France",flag:"🇫🇷",iso:250,region:"europe",city:"Paris",landmark:"the Eiffel Tower",lWiki:"https://en.wikipedia.org/wiki/Eiffel_Tower",lMaps:"https://maps.google.com/?q=Eiffel+Tower+Paris",food:"croissants and baguettes",fWiki:"https://en.wikipedia.org/wiki/Croissant",cap:"Paris",tz:"CET (UTC+1)",st:"soccer",tFull:"Ligue 1 Football",tName:"Ligue 1",tWiki:"https://en.wikipedia.org/wiki/Ligue_1",say:["football","les Bleus (national team)","Ligue 1"],avoid:["Underestimating French pride in their language — always attempt French even if imperfect"],note:"Football is dominant. The national team les Bleus are revered. PSG is the marquee club.",cities:[{n:"Paris",c:true},{n:"Lyon"},{n:"Marseille"},{n:"Toulouse"},{n:"Bordeaux"},{n:"Nice"}],eco:"Luxury goods, aerospace, agriculture, tourism — LVMH, Airbus define France",rel:"Secular by law (laicite); Catholic heritage but religion is intensely private",comm:"Intellectual, debate-loving — French business values wit, debate, philosophical discussion",tip:"Attempting French, even badly, earns enormous goodwill. Food is sacred — never rush a meal.",langs:[{native:"Bonjour",romaji:"Bonjour",meaning:"Good morning — Hello",context:"Always greet with Bonjour when entering — skipping it is considered rude",lang:"fr-FR"},{native:"Merci beaucoup",romaji:"Merci beaucoup",meaning:"Thank you very much",context:"Standard thank you — add Monsieur or Madame for extra formality",lang:"fr-FR"},{native:"Enchante",romaji:"Enchante",meaning:"Delighted to meet you",context:"Classic French first-meeting phrase — elegant and appreciated",lang:"fr-FR"}],etiq:{greet:"Bisous (air kisses) among acquaintances. Handshake in formal business. Say Bonjour to everyone.",avoid:"Never eat on the street. Never discuss money directly. Do not skip the greeting.",gift:"Quality wine, good chocolate, or flowers (not chrysanthemums — they are for funerals)."},qF:["croissants and baguettes","bratwurst","fish and chips","paella"],qL:["the Eiffel Tower","the Brandenburg Gate","Big Ben","the Colosseum"],qC:["Intellectual, debate-loving, food and culture are social currency","Direct and efficient, punctuality is sacred","Indirect and understated, avoid confrontation","Casual, egalitarian, humor bridges everything"],ctx:"a luxury goods conference in Paris"},
+  {s:"Italy",flag:"🇮🇹",iso:380,region:"europe",city:"Rome",landmark:"the Colosseum",lWiki:"https://en.wikipedia.org/wiki/Colosseum",lMaps:"https://maps.google.com/?q=Colosseum+Rome+Italy",food:"pasta and gelato",fWiki:"https://en.wikipedia.org/wiki/Pasta",cap:"Rome",tz:"CET (UTC+1)",st:"soccer",tFull:"Serie A Football",tName:"Serie A",tWiki:"https://en.wikipedia.org/wiki/Serie_A",say:["calcio","Serie A","la Nazionale (national team)"],avoid:["Calling it soccer — it is calcio or football, and passion for it is intense"],note:"Calcio is a religion in Italy. Juventus, Inter Milan, AC Milan have global followings. Formula 1 (Ferrari) is also a massive passion.",cities:[{n:"Rome",c:true},{n:"Milan"},{n:"Naples"},{n:"Turin"},{n:"Florence"},{n:"Venice"}],eco:"Fashion, luxury goods, food, automotive — Ferrari, Prada, Gucci, Barilla",rel:"Catholic — deeply embedded in culture even if not always practiced",comm:"Expressive, relationship-driven, animated — gestures are communication",tip:"Italians do business with people they like. Relationship before transaction. Never rush.",langs:[{native:"Buongiorno",romaji:"Buongiorno",meaning:"Good morning — Good day",context:"Standard greeting until afternoon — always use when entering",lang:"it-IT"},{native:"Grazie mille",romaji:"Grazie mille",meaning:"A thousand thanks",context:"Shows genuine appreciation — more expressive than plain grazie",lang:"it-IT"},{native:"Piacere di conoscerti",romaji:"Piacere di conoscerti",meaning:"Pleasure to meet you",context:"Warm first-meeting phrase — Italians appreciate expressiveness",lang:"it-IT"}],etiq:{greet:"Handshake standard. Air kisses among acquaintances. Dress impressively — Italians notice.",avoid:"Never ask for parmesan on seafood pasta — cultural faux pas. Never rush to business.",gift:"Quality wine, fine chocolates, artisan items."},qF:["pasta and gelato","croissants","fish and chips","bratwurst"],qL:["the Colosseum","the Eiffel Tower","Big Ben","the Brandenburg Gate"],qC:["Expressive, relationship-driven, business happens with people you like","Direct and efficient, agenda-driven meetings","Formal and hierarchical, titles and credentials matter","Indirect and understated, avoid direct confrontation"],ctx:"a fashion and luxury goods summit in Milan"},
+  {s:"Spain",flag:"🇪🇸",iso:724,region:"europe",city:"Madrid",landmark:"the Sagrada Familia",lWiki:"https://en.wikipedia.org/wiki/Sagrada_Fam%C3%ADlia",lMaps:"https://maps.google.com/?q=Sagrada+Familia+Barcelona+Spain",food:"paella and tapas",fWiki:"https://en.wikipedia.org/wiki/Paella",cap:"Madrid",tz:"CET (UTC+1)",st:"soccer",tFull:"La Liga Football",tName:"La Liga",tWiki:"https://en.wikipedia.org/wiki/La_Liga",say:["La Liga","Real Madrid","Barcelona","el futbol"],avoid:["Saying soccer — it is futbol, and the Real Madrid vs Barcelona rivalry is one of the most intense in sports"],note:"El Clasico (Real Madrid vs Barcelona) divides Spain. Asking which team they support is a great icebreaker.",cities:[{n:"Madrid",c:true},{n:"Barcelona"},{n:"Seville"},{n:"Valencia"},{n:"Bilbao"},{n:"Malaga"}],eco:"Tourism, renewable energy, agriculture — Inditex (Zara), Banco Santander, Iberdrola",rel:"Catholic — culturally embedded; festivals and traditions are important",comm:"Warm, expressive, relationship-driven — time is flexible, relationships are not",tip:"Spaniards eat dinner at 9 or 10pm. Meetings may start late. Build personal rapport before business.",langs:[{native:"Buenos dias",romaji:"Buenos dias",meaning:"Good morning",context:"Standard business greeting until noon",lang:"es-ES"},{native:"Mucho gusto",romaji:"Mucho gusto",meaning:"Nice to meet you",context:"Warm and standard at first meetings",lang:"es-ES"},{native:"Salud",romaji:"Salud",meaning:"Cheers — to your health",context:"Said when toasting — make eye contact with everyone at the table",lang:"es-ES"}],etiq:{greet:"Firm handshake. Cheek kisses (dos besos) between mixed genders. Use titles initially.",avoid:"Do not rush to business. Do not be impatient about timing.",gift:"Quality wine, regional food products, artisan crafts."},qF:["paella and tapas","pasta and gelato","croissants","bratwurst"],qL:["the Sagrada Familia","the Colosseum","the Eiffel Tower","Big Ben"],qC:["Warm, expressive, relationship-driven — time is flexible, relationships are not","Direct and efficient, punctuality is sacred","Hierarchical, formal, credentials matter","Intellectual, debate-loving, food is social currency"],ctx:"a renewable energy conference in Madrid"},
+];
+
+// ── GAME ENGINE ──────────────────────────────────────────────
+let session=[],idx=0,score=0,answered=false,curSt=null,curRegion=null;
+let usTopoData=null,worldTopoData=null;
+const GAME_US_FIPS=new Set(US.map(s=>s.fips));
+
+function shuffle(a){let r=[...a];for(let i=r.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+function goHome(){
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  document.getElementById('homeScreen').style.display='block';
+  document.getElementById('gameScreen').style.display='none';
+}
+
+function startRegion(region){
+  curRegion=region;
+  if(region==='us') session=shuffle(US).slice(0,10);
+  else if(region==='asia') session=shuffle(INTL.filter(c=>c.region==='asia'));
+  else if(region==='europe') session=shuffle(INTL.filter(c=>c.region==='europe'));
+  idx=0;score=0;answered=false;
+  document.getElementById('homeScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  document.getElementById('gameTitle').textContent=region==='us'?'🇺🇸 United States':region==='asia'?'🌏 Asia Pacific':'🌍 Europe';
+  PB.length=0;
+  render();
+}
+
+function makeQ(st){
+  const intl=!!st.iso;
+  let pool=[];
+  if(intl){
+    pool=[
+      {tag:"food",prompt:`You are at ${st.ctx} and meet someone from ${st.s}. They mention missing a classic local dish. What food are they most likely talking about?`,correct:st.qF[0],opts:shuffle(st.qF),fb:`${st.qF[0]} is iconic in ${st.s}. Showing curiosity about local food is one of the fastest ways to connect.`,pills:[{l:"Landmark",v:st.landmark},{l:"Team",v:st.tFull}],links:lnk([{c:"lnk-wiki",u:st.fWiki,i:"📖",l:"Read about "+st.food}])},
+      {tag:"sports",prompt:`A colleague at ${st.ctx} from ${st.s} is excitedly messaging about a big game. What sport or team are they most likely following?`,correct:st.tFull,opts:shuffle([st.tFull,...st.qF.slice(1,3),...st.qL.slice(1,2)]).slice(0,4),fb:`That is ${st.tName}. Here is how locals actually talk about their teams:`,pills:[{l:"Famous food",v:st.food},{l:"Capital",v:st.cap}],links:lnk([{c:"lnk-team",u:st.tWiki,i:"📖",l:"Read about "+st.tName}])},
+      {tag:"landmark",prompt:`At ${st.ctx}, a contact from ${st.s} says "If you visit, you must see it — it defines our country." What landmark are they most likely referring to?`,correct:st.qL[0],opts:shuffle(st.qL),fb:`${st.qL[0]} is one of the most iconic sites in ${st.s}. Showing you know it makes a strong impression.`,pills:[{l:"Famous food",v:st.food},{l:"Team",v:st.tFull}],links:lnk([{c:"lnk-wiki",u:st.lWiki,i:"📖",l:"Read about it"},{c:"lnk-maps",u:st.lMaps,i:"🗺",l:"See on Google Maps"}])},
+      {tag:"culture",prompt:`You are about to have a business dinner with someone from ${st.s} at ${st.ctx}. Which best describes their communication and cultural style?`,correct:st.qC[0],opts:shuffle(st.qC),fb:`${st.eco}. ${st.comm}.`,pills:[{l:"Religion landscape",v:st.rel},{l:"Time zone",v:st.tz}],links:''},
+      {tag:"language",prompt:`You want to make a great first impression greeting your business contact from ${st.s}. Which phrase would be most appropriate at the start of your meeting?`,correct:st.langs[0].native+" — "+st.langs[0].meaning,opts:shuffle([st.langs[0].native+" — "+st.langs[0].meaning,st.langs[1].native+" — "+st.langs[1].meaning,st.langs[2].native+" — "+st.langs[2].meaning,"Good morning, pleased to meet you"]),fb:`${st.langs[0].native} means "${st.langs[0].meaning}" — ${st.langs[0].context}.`,pills:[{l:"Pronunciation",v:st.langs[0].romaji}],links:''},
+    ];
+  } else {
+    pool=[
+      {tag:"food",prompt:`You are at ${st.ctx} and meet someone from ${st.city}, ${st.s}. They mention missing the local food. What dish are they most likely talking about?`,correct:st.qF[0],opts:shuffle(st.qF),fb:`${st.qF[0]} is a signature dish of ${st.s}. Mentioning you have heard of it is a natural conversation bridge.`,pills:[{l:"Landmark",v:st.landmark},{l:"Team",v:st.tFull}],links:lnk([{c:"lnk-wiki",u:st.fWiki,i:"📖",l:"Read about "+st.food}])},
+      {tag:"sports",prompt:`A colleague at ${st.ctx} from ${st.s} mentions their hometown team had a big game. Which team are they most likely talking about?`,correct:st.tFull,opts:shuffle(st.qT),fb:`That is the ${st.tName} — the go-to team in ${st.s}. Here is how locals actually talk about them:`,pills:[{l:"Famous food",v:st.food},{l:"Landmark",v:st.landmark}],links:lnk([{c:"lnk-team",u:st.tWiki,i:"📖",l:"Read about the "+st.tName}])},
+      {tag:"landmark",prompt:`At ${st.ctx}, someone from ${st.s} says "If you ever visit, you absolutely have to see it." What landmark are they most likely referring to?`,correct:st.qL[0],opts:shuffle(st.qL),fb:`${st.qL[0]} is one of ${st.s}'s most iconic sites. Asking "is it as impressive as they say?" invites a great story.`,pills:[{l:"Famous food",v:st.food},{l:"Team",v:st.tFull}],links:lnk([{c:"lnk-wiki",u:st.lWiki,i:"📖",l:"Read about it"},{c:"lnk-maps",u:st.lMaps,i:"🗺",l:"See on Google Maps"}])},
+      {tag:"culture",prompt:`You are preparing for a business dinner with someone from ${st.s} at ${st.ctx}. Which best describes their communication and cultural style?`,correct:st.qC[0],opts:shuffle(st.qC),fb:`${st.eco}. ${st.comm}.`,pills:[{l:"Religion landscape",v:st.rel},{l:"Pro tip",v:st.tip}],links:''},
+    ];
+  }
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+// ── MAP DRAWING ──────────────────────────────────────────────
+function drawUSMap(tf){
+  const el=document.getElementById('mapContainer');
+  if(!el||!usTopoData)return;
+  el.innerHTML='';el.style.display='block';
+  const W=el.offsetWidth||640,H=190;
+  const svg=d3.select(el).append('svg').attr('width',W).attr('height',H);
+  const features=topojson.feature(usTopoData,usTopoData.objects.states).features;
+  const lower48=features.filter(d=>!["02","15","60","66","69","72","78"].includes(String(d.id).padStart(2,'0')));
+  const proj=d3.geoAlbersUsa().fitSize([W,H],{type:"FeatureCollection",features:lower48});
+  const path=d3.geoPath().projection(proj);
+  svg.selectAll('path').data(lower48).enter().append('path')
+    .attr('d',path)
+    .attr('fill',d=>{const f=String(d.id).padStart(2,'0');if(f===tf)return'#388bfd';return US_TZ[FIPS_TZ[f]||"Eastern"]||'#21262d';})
+    .attr('stroke','#0d1117').attr('stroke-width',d=>String(d.id).padStart(2,'0')===tf?2:0.5)
+    .attr('opacity',d=>{const f=String(d.id).padStart(2,'0');return(GAME_US_FIPS.has(f)||f===tf)?1:0.45;});
+  const am={};US.forEach(s=>am[s.fips]=s.a);
+  svg.selectAll('text').data(lower48.filter(d=>GAME_US_FIPS.has(String(d.id).padStart(2,'0')))).enter()
+    .append('text').attr('x',d=>path.centroid(d)[0]).attr('y',d=>path.centroid(d)[1]+3)
+    .attr('text-anchor','middle').attr('font-size','7px').attr('font-weight','700')
+    .attr('fill',d=>String(d.id).padStart(2,'0')===tf?'#fff':'#cae8ff')
+    .attr('pointer-events','none').text(d=>am[String(d.id).padStart(2,'0')]||'');
+}
+
+function drawWorldMap(isoId){
+  const el=document.getElementById('mapContainer');
+  if(!el||!worldTopoData)return;
+  el.innerHTML='';el.style.display='block';
+  const W=el.offsetWidth||640,H=190;
+  const svg=d3.select(el).append('svg').attr('width',W).attr('height',H);
+  const features=topojson.feature(worldTopoData,worldTopoData.objects.countries).features;
+  // Use Natural Earth projection for the world
+  const proj=d3.geoNaturalEarth1().fitSize([W,H],{type:"FeatureCollection",features});
+  const path=d3.geoPath().projection(proj);
+  svg.selectAll('path').data(features).enter().append('path')
+    .attr('d',path)
+    .attr('fill',d=>+d.id===isoId?'#388bfd':'#21262d')
+    .attr('stroke','#0d1117').attr('stroke-width',d=>+d.id===isoId?2:0.4)
+    .attr('opacity',d=>+d.id===isoId?1:0.7);
+  // Add country name label on highlighted country
+  const target=features.find(d=>+d.id===isoId);
+  if(target){
+    const c=path.centroid(target);
+    if(c&&!isNaN(c[0])&&!isNaN(c[1])){
+      svg.append('text').attr('x',c[0]).attr('y',c[1]+3)
+        .attr('text-anchor','middle').attr('font-size','10px').attr('font-weight','700')
+        .attr('fill','#fff').attr('pointer-events','none').text(curSt.flag);
+    }
+  }
+}
+
+function showMapFallback(){
+  const el=document.getElementById('mapContainer');
+  if(!el)return;
+  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;height:100%"><div style="font-size:3rem">${curSt.flag||curSt.a}</div><a href="https://maps.google.com/?q=${encodeURIComponent(curSt.s)}" target="_blank" rel="noopener" style="font-size:.75rem;color:#388bfd;border:1px solid #388bfd;padding:4px 12px;border-radius:6px;text-decoration:none">🗺 Open in Google Maps</a></div>`;
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function render(){
+  if(idx>=session.length){renderEnd();return;}
+  PB.length=0;
+  const st=session[idx];curSt=st;
+  const q=makeQ(st);
+  const total=session.length;
+  const pct=Math.round((idx/total)*100);
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('scCorrect').textContent=score;
+  document.getElementById('scDone').textContent=idx;
+  document.getElementById('scLeft').textContent=total-idx;
+
+  const tagLabel={food:"🍽 Food",sports:"🏆 Sports",landmark:"📍 Landmark",culture:"🤝 Culture",language:"🗣 Language"};
+  const tagCls={food:"qt-food",sports:"qt-sports",landmark:"qt-landmark",culture:"qt-culture",language:"qt-language"};
+  const cardBorder={food:"tag-food",sports:"tag-sports",landmark:"tag-landmark",culture:"tag-culture",language:"tag-language"};
+
+  const stIdx=rp(st.s);
+  const citiesHtml=st.cities.map(c=>{const ci=rp(c.n);return`<div class="city-item${c.c?' cap':''}"><span class="city-name">${c.n}${c.c?' ★':''}</span><button class="spk" onclick="si(${ci},this)">🔊</button></div>`;}).join('');
+  const tzLeg=st.fips?Object.entries(US_TZ).map(([tz,c])=>`<span><span class="tz-dot" style="background:${c}"></span><span>${tz}</span></span>`).join(''):'';
+
+  document.getElementById('mapCard').innerHTML=`
+    <div class="map-header">
+      <span class="st-badge">${st.flag||st.a}</span>
+      <div class="st-info">
+        <div class="st-name-row"><span class="st-name">${st.s}</span><button class="spk" onclick="si(${stIdx},this)">🔊</button></div>
+        <div class="st-cap">Capital: ${st.cap} · ${st.tz}</div>
+      </div>
+    </div>
+    <div id="mapContainer" style="width:100%;height:190px;border-radius:8px;overflow:hidden;background:#161b22;margin-bottom:.75rem"></div>
+    ${tzLeg?`<div class="tz-legend">${tzLeg}<span style="color:#484f58">· Bright = current</span></div>`:''}
+    <div class="cities-wrap">${citiesHtml}</div>
+  `;
+
+  // Draw appropriate map
+  if(st.fips){
+    if(usTopoData) drawUSMap(st.fips);
+    else showMapFallback();
+  } else {
+    if(worldTopoData) drawWorldMap(st.iso);
+    else showMapFallback();
+  }
+
+  const choiceIcon=(opt)=>{
+    if(q.tag!=='sports'||!st.fips)return'';
+    const m=opt.match(/\((\w+)\)/);return m?`<span style="font-size:.85rem;flex-shrink:0">${LEAGUE_E[m[1]]||'🏆'}</span>`:'';
+  };
+
+  document.getElementById('qCard').innerHTML=`
+    <div class="q-card ${cardBorder[q.tag]}">
+      <div class="q-tags"><span class="q-tag qt-state">${st.flag||st.a} ${st.s}</span><span class="q-tag ${tagCls[q.tag]}">${tagLabel[q.tag]}</span></div>
+      <div class="q-text">${q.prompt}</div>
+    </div>
+  `;
+  document.getElementById('choicesEl').innerHTML=`<div class="choices">${q.opts.map((o,i)=>`<button class="choice" onclick="pick(this)"><span class="cl">${String.fromCharCode(65+i)}.</span>${choiceIcon(o)}<span class="ctxt">${o}</span></button>`).join('')}</div>`;
+  document.querySelectorAll('.choice').forEach((b,i)=>{b._opt=q.opts[i];b._correct=(q.opts[i]===q.correct);b._q=q;});
+  document.getElementById('fbEl').innerHTML='';
+}
+
+function pick(btn){
+  if(answered)return;
+  answered=true;
+  const q=btn._q,st=curSt,correct=btn._correct;
+  if(correct)score++;
+  document.querySelectorAll('.choice').forEach(b=>{
+    if(b._correct)b.classList.add('correct');
+    else if(b===btn&&!correct)b.classList.add('wrong');
+  });
+  const pills=q.pills.map(p=>`<span class="fp"><strong>${p.l}:</strong> ${p.v}</span>`).join('');
+
+  let extra='';
+
+  // Sports box
+  if(q.tag==='sports'){
+    const sayItems=st.say.map(phrase=>{const pi=rp(phrase);return`<div class="say-item"><span class="say-text">${phrase}</span><button class="say-btn" onclick="si(${pi},this)">🔊</button></div>`;}).join('');
+    const avoidItems=st.avoid.map(a=>`<div class="avoid-item">${a}</div>`).join('');
+    const icon=SPORT_E[st.st]||'🏆';
+    extra=`<div class="sp-box"><div class="sp-title">How locals actually talk about this team</div><div class="team-row"><div class="team-icon">${icon}</div><div><div class="team-name">${st.tName}</div><div style="font-size:.72rem;color:var(--text2);margin-top:2px">${st.tFull}</div></div></div><div class="sp-section"><div class="sp-lbl">Say this</div><div class="say-list">${sayItems}</div></div><div class="sp-section"><div class="sp-lbl">Avoid</div><div class="avoid-list">${avoidItems}</div></div><div class="sp-section"><div class="sp-lbl">Local knowledge</div><div class="sp-note-text">${st.note}</div></div></div>`;
+  }
+
+  // Culture + etiquette box
+  if(q.tag==='culture'||q.tag==='language'){
+    const e=st.etiq||{};
+    extra=`<div class="cu-box"><div class="cu-title">Business briefing — ${st.s}</div>
+      <div class="cu-row"><div class="cu-lbl">Economy</div><div class="cu-val">${st.eco}</div></div>
+      <div class="cu-row"><div class="cu-lbl">Communication style</div><div class="cu-val">${st.comm}</div></div>
+      ${st.tip?`<div class="cu-row"><div class="cu-lbl">Pro tip</div><div class="cu-val">${st.tip}</div></div>`:''}
+      ${e.greet?`<div class="cu-row"><div class="cu-lbl">Greeting etiquette</div><div class="cu-val">${e.greet}</div></div>`:''}
+      ${e.avoid?`<div class="cu-row"><div class="cu-lbl">Never do this</div><div class="cu-val" style="color:var(--red)">${e.avoid}</div></div>`:''}
+      ${e.gift?`<div class="cu-row"><div class="cu-lbl">Gift giving</div><div class="cu-val">${e.gift}</div></div>`:''}
+    </div>`;
+  }
+
+  // Language phrase box
+  if(q.tag==='language'&&st.langs){
+    const langItems=st.langs.map(p=>{
+      const pi=rp(p.native);
+      return`<div class="lang-item"><div class="lang-phrase"><div class="lang-native">${p.native}</div><div class="lang-meaning">${p.romaji} — ${p.meaning}</div><div class="lang-context">${p.context}</div></div><button class="say-btn" onclick="si(${pi},this,'${p.lang||'en-US'}')">🔊</button></div>`;
+    }).join('');
+    extra+=`<div class="lang-box"><div class="lang-title">Essential phrases for ${st.s}</div><div class="lang-list">${langItems}</div></div>`;
+  }
+
+  document.getElementById('fbEl').innerHTML=`
+    <div class="fb-card">
+      <div class="${correct?'fb-ok':'fb-no'}">${correct?'✓ You got it.':'✗ Good to know for next time.'}</div>
+      <div class="fb-txt">${q.fb}</div>
+      <div class="fact-pills">${pills}</div>
+      ${q.links||''}
+    </div>
+    ${extra}
+    <button class="next-btn" onclick="next()">${idx+1<session.length?'Next →':'See results →'}</button>
+  `;
+}
+
+function next(){window.speechSynthesis&&window.speechSynthesis.cancel();answered=false;idx++;render();}
+
+function renderEnd(){
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  const total=session.length;
+  const pct=Math.round((score/total)*100);
+  document.getElementById('progFill').style.width='100%';
+  document.getElementById('mapCard').innerHTML='';
+  document.getElementById('qCard').innerHTML='';
+  document.getElementById('choicesEl').innerHTML='';
+  const msg=pct>=80?"You are ready to walk into any room in this region and hold a real business conversation.":pct>=50?"Solid session — you are building genuine cultural intelligence.":"Great start. Each session builds your mental map. Keep going.";
+  document.getElementById('fbEl').innerHTML=`<div class="end-wrap"><div style="font-size:3rem;margin-bottom:1rem">🎯</div><div class="end-title">Session Complete</div><div class="end-sub">${msg}</div><div class="end-scores"><div class="em"><div class="em-n">${score}/${total}</div><div class="em-l">Correct</div></div><div class="em"><div class="em-n">${pct}%</div><div class="em-l">Accuracy</div></div></div><div class="end-btns"><button class="replay-btn" onclick="startRegion(curRegion)">Play Again</button><button class="home-btn" onclick="goHome()">← Choose Region</button></div></div>`;
+}
+
+// ── LOAD MAP DATA ────────────────────────────────────────────
+// Load US atlas
+fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json')
+  .then(r=>r.json()).then(d=>{usTopoData=d;if(curSt&&curSt.fips)drawUSMap(curSt.fips);})
+  .catch(()=>{});
+
+// Load world atlas
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+  .then(r=>r.json()).then(d=>{worldTopoData=d;if(curSt&&curSt.iso)drawWorldMap(curSt.iso);})
+  .catch(()=>{});
+</script>
+</body>
+</html>
