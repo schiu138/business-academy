@@ -92,11 +92,15 @@ a:hover{text-decoration:underline}
 .qt-language{background:#0d2a2a;color:#b3f0e0;border:1px solid var(--teal)}
 .q-text{font-size:.9rem;color:var(--text);line-height:1.65}
 .choices{display:flex;flex-direction:column;gap:7px;margin-bottom:1rem}
-.choice{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;font-size:.86rem;color:var(--text);text-align:left;cursor:pointer;width:100%;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:8px}
+.choice{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;font-size:.86rem;color:var(--text);text-align:left;cursor:pointer;width:100%;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.choice .ctxt{flex:1}
 .choice:hover{background:var(--bg3);border-color:var(--text2)}
 .choice.correct{background:var(--green-dim);border-color:var(--green);color:var(--green-light)}
 .choice.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red-light)}
 .cl{color:var(--text3);font-size:.72rem;flex-shrink:0;font-weight:600}
+.choice-spk{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-size:.75rem;padding:0;flex-shrink:0;margin-left:auto;font-family:inherit;transition:all .15s}
+.choice-spk:hover{background:var(--blue-dim);border-color:var(--blue)}
+.choice-spk.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 
 /* FEEDBACK */
 .fb-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
@@ -628,7 +632,18 @@ function render(){
       <div class="q-text">${q.prompt}</div>
     </div>
   `;
-  document.getElementById('choicesEl').innerHTML=`<div class="choices">${q.opts.map((o,i)=>`<button class="choice" onclick="pick(this)"><span class="cl">${String.fromCharCode(65+i)}.</span>${choiceIcon(o)}<span class="ctxt">${o}</span></button>`).join('')}</div>`;
+  // For language questions, add speaker button to each choice
+  const isLangQ=(q.tag==='language');
+  const langCode=curSt.langs&&curSt.langs[0]?curSt.langs[0].lang:'en-US';
+  document.getElementById('choicesEl').innerHTML=`<div class="choices">${q.opts.map((o,i)=>{
+    // Extract just the native script part (before the —) for speaking
+    const nativePart=o.split(' — ')[0].trim();
+    const speakPart=isLangQ&&!o.startsWith('Good')?nativePart:o;
+    const spkIdx=rp(speakPart);
+    const spkLang=isLangQ&&!o.startsWith('Good')?langCode:'en-US';
+    const spkBtn=isLangQ?`<button class="choice-spk" onclick="event.stopPropagation();si(${spkIdx},this,'${spkLang}')">🔊</button>`:'';
+    return`<button class="choice" onclick="pick(this)"><span class="cl">${String.fromCharCode(65+i)}.</span>${choiceIcon(o)}<span class="ctxt">${o}</span>${spkBtn}</button>`;
+  }).join('')}</div>`;
   document.querySelectorAll('.choice').forEach((b,i)=>{b._opt=q.opts[i];b._correct=(q.opts[i]===q.correct);b._q=q;});
   document.getElementById('fbEl').innerHTML='';
 }
