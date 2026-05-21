@@ -525,14 +525,6 @@ function drawUSMap(tf){
     .attr('pointer-events','none').text(d=>am[String(d.id).padStart(2,'0')]||'');
 }
 
-// Region bounding boxes [lon1, lat1, lon2, lat2]
-const REGION_BOUNDS={
-  asia:[[60,70],[160,-50]],
-  europe:[[-30,75],[45,30]],
-  latam:[[-120,35],[-30,-60]],
-  mea:[[-20,40],[60,-40]]
-};
-
 function drawWorldMap(isoId){
   const el=document.getElementById('mapContainer');
   if(!el||!worldTopoData)return;
@@ -541,30 +533,38 @@ function drawWorldMap(isoId){
   const svg=d3.select(el).append('svg').attr('width',W).attr('height',H);
   const features=topojson.feature(worldTopoData,worldTopoData.objects.countries).features;
 
-  // Get region bounds for zooming
-  const bounds=REGION_BOUNDS[curRegion]||[[-180,85],[180,-85]];
-  const [[lon1,lat1],[lon2,lat2]]=bounds;
-  // Create a bounding box feature for fitExtent
-  const bbox={type:"Feature",geometry:{type:"Polygon",coordinates:[[[lon1,lat1],[lon2,lat1],[lon2,lat2],[lon1,lat2],[lon1,lat1]]]}};
+  // Find the target country and zoom tightly onto it with neighbors
+  const target=features.find(d=>+d.id===isoId);
+  if(!target){return;}
 
-  const proj=d3.geoMercator().fitExtent([[10,10],[W-10,H-10]],bbox);
+  // Compute the country's own bounding box, then expand it by ~40% for context
+  const [[x0,y0],[x1,y1]]=d3.geoBounds(target);
+  const lonPad=(x1-x0)*0.6+8;
+  const latPad=(y1-y0)*0.6+8;
+  const bbox={type:"Feature",geometry:{type:"Polygon",coordinates:[[[x0-lonPad,y0-latPad],[x1+lonPad,y0-latPad],[x1+lonPad,y1+latPad],[x0-lonPad,y1+latPad],[x0-lonPad,y0-latPad]]]}};
+
+  const proj=d3.geoMercator().fitExtent([[8,8],[W-8,H-8]],bbox);
   const path=d3.geoPath().projection(proj);
 
-  svg.selectAll('path').data(features).enter().append('path')
-    .attr('d',path)
-    .attr('fill',d=>+d.id===isoId?'#388bfd':'#21262d')
-    .attr('stroke','#0d1117').attr('stroke-width',d=>+d.id===isoId?2:0.4)
-    .attr('opacity',d=>+d.id===isoId?1:0.75);
+  // Draw neighboring countries first (dim), then target on top
+  svg.selectAll('path.nbr').data(features.filter(d=>+d.id!==isoId)).enter()
+    .append('path').attr('class','nbr').attr('d',path)
+    .attr('fill','#21262d').attr('stroke','#0d1117').attr('stroke-width',0.5).attr('opacity',0.8);
 
-  // Flag label on highlighted country
-  const target=features.find(d=>+d.id===isoId);
-  if(target){
-    const c=path.centroid(target);
-    if(c&&!isNaN(c[0])&&!isNaN(c[1])&&c[0]>0&&c[1]>0&&c[0]<W&&c[1]<H){
-      svg.append('text').attr('x',c[0]).attr('y',c[1]+5)
-        .attr('text-anchor','middle').attr('font-size','16px')
-        .attr('pointer-events','none').text(curSt.flag||'');
-    }
+  // Draw highlighted country on top in bright blue
+  svg.append('path')
+    .datum(target).attr('d',path)
+    .attr('fill','#388bfd').attr('stroke','#cae8ff').attr('stroke-width',1.5);
+
+  // Flag + name label centered on country
+  const c=path.centroid(target);
+  if(c&&!isNaN(c[0])&&!isNaN(c[1])){
+    svg.append('text').attr('x',c[0]).attr('y',c[1]-4)
+      .attr('text-anchor','middle').attr('font-size','22px')
+      .attr('pointer-events','none').text(curSt.flag||'');
+    svg.append('text').attr('x',c[0]).attr('y',c[1]+20)
+      .attr('text-anchor','middle').attr('font-size','11px').attr('font-weight','700')
+      .attr('fill','#fff').attr('pointer-events','none').text(curSt.s||'');
   }
 }
 
