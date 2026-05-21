@@ -105,6 +105,8 @@ a:hover{text-decoration:underline}
 .fb-txt{font-size:.84rem;color:var(--text2);line-height:1.6;margin-bottom:.6rem}
 .fact-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.6rem}
 .fp{font-size:.7rem;padding:3px 9px;border-radius:5px;border:1px solid var(--border);color:var(--text2);background:var(--bg3)}
+.fp-link{color:var(--blue-light);border-color:var(--blue);background:var(--blue-dim);text-decoration:none;cursor:pointer}
+.fp-link:hover{background:#2a4a7f;color:#fff;text-decoration:none}
 .links-row{display:flex;flex-wrap:wrap;gap:6px}
 .lnk{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;padding:5px 11px;border-radius:6px;border:1px solid var(--border);color:var(--text2);text-decoration:none;background:var(--bg3);transition:all .15s}
 .lnk-wiki{border-color:var(--blue);color:var(--blue-light);background:var(--blue-dim)}
@@ -369,6 +371,75 @@ const INTL=[
   {s:"Nigeria",flag:"🇳🇬",iso:566,region:"mea",city:"Lagos",landmark:"Yankari National Park",lWiki:"https://en.wikipedia.org/wiki/Yankari_National_Park",lMaps:"https://maps.google.com/?q=Yankari+National+Park+Nigeria",food:"jollof rice and suya",fWiki:"https://en.wikipedia.org/wiki/Jollof_rice",cap:"Abuja",tz:"WAT (UTC+1)",st:"soccer",tFull:"Super Eagles (Nigeria Football)",tName:"Super Eagles",tWiki:"https://en.wikipedia.org/wiki/Nigeria_national_football_team",say:["the Super Eagles","Nigeria football","Eagles"],avoid:["Treating Nigeria as a monolith — it has over 250 ethnic groups and three dominant cultures (Hausa, Yoruba, Igbo)"],note:"The Super Eagles are one of Africa's most successful football teams. Afrobeats music (Burna Boy, Wizkid) is Nigeria's biggest cultural export. Nollywood is the world's second-largest film industry.",cities:[{n:"Lagos"},{n:"Kano"},{n:"Ibadan"},{n:"Abuja",c:true},{n:"Port Harcourt"},{n:"Benin City"}],eco:"Oil, fintech, entertainment — largest economy in Africa; thriving startup scene in Lagos (Silicon Lagoon)",rel:"Roughly half Christian, half Muslim — religion is central to identity and respected deeply",comm:"Expressive, entrepreneurial, relationship-driven — Nigerians are among the most educated and ambitious people globally",tip:"Nigerians are enormously proud of their culture, food, and Afrobeats music. The Jollof rice debate (Nigeria vs Ghana) is a fun cultural icebreaker. Lagos startup scene is world-class.",langs:[{native:"Bawo ni",romaji:"Bawo ni",meaning:"How are you? (Yoruba)",context:"Most widely useful — Lagos is predominantly Yoruba",lang:"yo-NG"},{native:"Ndewo",romaji:"Ndewo",meaning:"Hello and welcome (Igbo)",context:"Used in southeastern Nigeria and in business settings in Lagos",lang:"ig-NG"},{native:"E kaabo",romaji:"E kaabo",meaning:"Welcome (Yoruba)",context:"Warm welcoming phrase — shows respect for local culture",lang:"yo-NG"}],etiq:{greet:"Warm handshake. Kneeling or bowing slightly to elders shows respect. Very warm and expressive greetings.",avoid:"Never refuse food offered by a host — it is deeply disrespectful. Never be condescending.",gift:"Quality imported goods, good whisky or wine, or fine food items are appreciated."},qF:["jollof rice and suya","South African braai and biltong","Ethiopian injera and coffee","shawarma and hummus"],qL:["Yankari National Park","Table Mountain","the Burj Khalifa","the Pyramids of Giza"],qC:["Expressive, entrepreneurial, relationship-driven, enormously proud of culture and ambition","Formal, hierarchical, relationship-driven, trust built slowly","Direct but warm, ubuntu philosophy, community valued","Casual, egalitarian, humor bridges everything"],ctx:"a fintech and energy industry conference in Lagos"},
 ];
 
+
+// Secondary teams for US states - rotates sports variety
+const SEC_TEAMS={
+  "Texas":[
+    {tFull:"Houston Rockets (NBA)",tName:"Houston Rockets",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Houston_Rockets",say:["the Rockets","the Rock"],avoid:["Houston Rockets in full — just say the Rockets"],note:"The Rockets were home to Hakeem Olajuwon's back-to-back championships. Houston sports fans are intensely loyal."},
+    {tFull:"Houston Astros (MLB)",tName:"Houston Astros",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Houston_Astros",say:["the Astros","the Stros"],avoid:["Houston Astros in full — just the Astros"],note:"The Astros are reigning World Series contenders. The Space City branding reflects Houston's NASA identity."},
+    {tFull:"Dallas Mavericks (NBA)",tName:"Dallas Mavericks",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Dallas_Mavericks",say:["the Mavs","the Mavericks"],avoid:["Dallas Mavericks in full — the Mavs is how locals say it"],note:"The Mavs won the 2011 NBA title and Luka Doncic has made them must-watch basketball again."},
+    {tFull:"San Antonio Spurs (NBA)",tName:"San Antonio Spurs",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/San_Antonio_Spurs",say:["the Spurs","San Antonio basketball"],avoid:["Overlooking the Spurs dynasty — 5 NBA titles under Gregg Popovich"],note:"The Spurs are one of the most successful franchises in NBA history. Tim Duncan and Gregg Popovich are legends."},
+  ],
+  "California":[
+    {tFull:"Golden State Warriors (NBA)",tName:"Golden State Warriors",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Golden_State_Warriors",say:["the Warriors","Dub Nation","the W"],avoid:["Golden State Warriors in full — just the Warriors"],note:"Dub Nation is the fan community. The Warriors dynasty (Curry era) made Oakland/San Francisco a basketball city."},
+    {tFull:"Los Angeles Dodgers (MLB)",tName:"Los Angeles Dodgers",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Los_Angeles_Dodgers",say:["the Dodgers","the Blue"],avoid:["LA Dodgers — just the Dodgers in conversation"],note:"The Dodgers are one of the most storied franchises in baseball history. Dodger Stadium is a landmark."},
+    {tFull:"San Francisco Giants (MLB)",tName:"San Francisco Giants",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/San_Francisco_Giants",say:["the Giants","the G-Men","San Francisco baseball"],avoid:["Confusing SF Giants with New York Giants — completely different teams and sports"],note:"The Giants rivalry with the Dodgers is one of the oldest in baseball — dating back to New York."},
+    {tFull:"San Diego Padres (MLB)",tName:"San Diego Padres",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/San_Diego_Padres",say:["the Padres","SD baseball"],avoid:["San Diego Padres in full — just the Padres"],note:"The Padres are San Diego's only major league team. Local pride is fierce."},
+  ],
+  "New York":[
+    {tFull:"New York Knicks (NBA)",tName:"New York Knicks",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/New_York_Knicks",say:["the Knicks","New York basketball"],avoid:["New York Knicks in full — just the Knicks"],note:"Madison Square Garden is the Mecca of basketball. Knicks passion is intense even during rebuilding years."},
+    {tFull:"New York Mets (MLB)",tName:"New York Mets",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/New_York_Mets",say:["the Mets","the Amazins"],avoid:["Assuming everyone in NY is a Yankees fan — Mets fans are passionate and Queens-loyal"],note:"The Mets vs Yankees (Subway Series) is a city-dividing rivalry. Queens vs The Bronx."},
+    {tFull:"New York Rangers (NHL)",tName:"New York Rangers",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/New_York_Rangers",say:["the Rangers","Broadway Blueshirts"],avoid:["New York Rangers in full — the Rangers or Broadway Blueshirts"],note:"Broadway Blueshirts refers to their blue uniforms. Madison Square Garden games are a New York bucket list experience."},
+  ],
+  "Illinois":[
+    {tFull:"Chicago Cubs (MLB)",tName:"Chicago Cubs",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Chicago_Cubs",say:["the Cubs","North Siders","the Cubbies"],avoid:["Assuming a Chicagoan is a Cubs fan — they might be a White Sox (South Side) fan"],note:"Cubs vs White Sox (Crosstown Classic) divides Chicago by neighborhood. Wrigley Field is a baseball cathedral."},
+    {tFull:"Chicago White Sox (MLB)",tName:"Chicago White Sox",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Chicago_White_Sox",say:["the Sox","South Siders","the White Sox"],avoid:["Mixing up Cubs and White Sox fans — the rivalry is fierce and geographic"],note:"South Side vs North Side is the real divide. White Sox fans are fiercely loyal and often more working-class in identity."},
+    {tFull:"Chicago Blackhawks (NHL)",tName:"Chicago Blackhawks",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Chicago_Blackhawks",say:["the Hawks","the Blackhawks"],avoid:["Chicago Blackhawks in full — just the Hawks"],note:"The Blackhawks won 3 Stanley Cups (2010-2015) and are deeply beloved. Chicago is a major hockey city."},
+  ],
+  "Florida":[
+    {tFull:"Tampa Bay Buccaneers (NFL)",tName:"Tampa Bay Buccaneers",st:"football",tWiki:"https://en.wikipedia.org/wiki/Tampa_Bay_Buccaneers",say:["the Bucs","Tampa Bay football"],avoid:["Assuming Miami sports for all of Florida — Tampa has fierce independent pride"],note:"The Bucs won Super Bowl LV with Tom Brady. Tampa Bay sports loyalty is completely separate from Miami loyalty."},
+    {tFull:"Tampa Bay Lightning (NHL)",tName:"Tampa Bay Lightning",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Tampa_Bay_Lightning",say:["the Lightning","the Bolts"],avoid:["Tampa Bay Lightning in full — the Bolts is the insider shorthand"],note:"The Lightning are back-to-back Stanley Cup champions and Tampa's hottest sports ticket."},
+    {tFull:"Inter Miami (MLS)",tName:"Inter Miami",st:"soccer",tWiki:"https://en.wikipedia.org/wiki/Inter_Miami_CF",say:["Inter Miami","Las Garzas","Miami soccer"],avoid:["Ignoring Inter Miami — Messi's arrival made them the most talked-about club in America"],note:"Lionel Messi joining Inter Miami in 2023 transformed MLS. Miami soccer culture is now a major business conversation topic."},
+  ],
+  "Pennsylvania":[
+    {tFull:"Pittsburgh Steelers (NFL)",tName:"Pittsburgh Steelers",st:"football",tWiki:"https://en.wikipedia.org/wiki/Pittsburgh_Steelers",say:["the Steelers","the Black and Gold","Pittsburgh football"],avoid:["Assuming all Pennsylvanians like the Eagles — Pittsburgh and Philadelphia are fiercely rival cities"],note:"Pittsburgh and Philadelphia are completely different cultures. The Steelers Terrible Towel is one of the most iconic fan traditions in sports."},
+    {tFull:"Philadelphia Phillies (MLB)",tName:"Philadelphia Phillies",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Philadelphia_Phillies",say:["the Phillies","the Phils"],avoid:["Philadelphia Phillies in full — just the Phillies or the Phils"],note:"Philadelphia is one of the most passionate baseball cities in America. Citizens Bank Park atmosphere is electric."},
+    {tFull:"Philadelphia 76ers (NBA)",tName:"Philadelphia 76ers",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Philadelphia_76ers",say:["the Sixers","76ers","Philly basketball"],avoid:["Philadelphia 76ers in full — the Sixers is what locals say"],note:"Trust the Process was the famous Sixers rebuilding slogan that became a national cultural reference."},
+  ],
+  "Washington":[
+    {tFull:"Seattle Mariners (MLB)",tName:"Seattle Mariners",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Seattle_Mariners",say:["the Mariners","the M's"],avoid:["Seattle Mariners in full — the M's is the casual local shorthand"],note:"The Mariners have one of the most loyal fan bases in baseball despite decades of near-misses. Ken Griffey Jr. is a Seattle legend."},
+    {tFull:"Seattle Kraken (NHL)",tName:"Seattle Kraken",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Seattle_Kraken",say:["the Kraken","Seattle hockey","Release the Kraken"],avoid:["Underestimating Kraken passion — Seattle embraced hockey instantly and intensely"],note:"Release the Kraken is the battle cry. The Kraken are new (2021) but already have one of the loudest fan bases in the NHL."},
+    {tFull:"Seattle Sounders (MLS)",tName:"Seattle Sounders",st:"soccer",tWiki:"https://en.wikipedia.org/wiki/Seattle_Sounders_FC",say:["the Sounders","Seattle soccer"],avoid:["Overlooking the Sounders — they regularly sell out 40,000+ seat stadiums"],note:"The Sounders have one of the most passionate soccer fan bases in North America. Cascadia Cup rivalry with Portland is intense."},
+  ],
+  "Colorado":[
+    {tFull:"Denver Nuggets (NBA)",tName:"Denver Nuggets",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Denver_Nuggets",say:["the Nuggets","Denver basketball"],avoid:["Denver Nuggets in full — just the Nuggets"],note:"The Nuggets won the 2023 NBA Championship with Nikola Jokic — Denver's first NBA title."},
+    {tFull:"Colorado Avalanche (NHL)",tName:"Colorado Avalanche",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Colorado_Avalanche",say:["the Avs","the Avalanche"],avoid:["Colorado Avalanche in full — the Avs is universal"],note:"The Avs won the 2022 Stanley Cup. Colorado is a serious hockey state — mountain culture and hockey go together."},
+    {tFull:"Colorado Rockies (MLB)",tName:"Colorado Rockies",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Colorado_Rockies",say:["the Rockies","Colorado baseball"],avoid:["Colorado Rockies in full — just the Rockies"],note:"Coors Field in downtown Denver is one of baseball's most beautiful parks. High altitude affects how the ball travels."},
+  ],
+  "Georgia":[
+    {tFull:"Atlanta Falcons (NFL)",tName:"Atlanta Falcons",st:"football",tWiki:"https://en.wikipedia.org/wiki/Atlanta_Falcons",say:["the Falcons","Atlanta football","Rise Up"],avoid:["Bringing up the 28-3 Super Bowl — still a sore subject for Falcons fans"],note:"Rise Up is the Falcons rallying cry. The 28-3 Super Bowl loss (2017) is the most painful moment in Atlanta sports history."},
+    {tFull:"Atlanta Hawks (NBA)",tName:"Atlanta Hawks",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Atlanta_Hawks",say:["the Hawks","Atlanta basketball"],avoid:["Atlanta Hawks in full — just the Hawks"],note:"The Hawks and Trae Young have brought exciting basketball back to Atlanta. State Farm Arena is a great client outing."},
+    {tFull:"Atlanta United (MLS)",tName:"Atlanta United",st:"soccer",tWiki:"https://en.wikipedia.org/wiki/Atlanta_United_FC",say:["Atlanta United","the Five Stripes"],avoid:["Overlooking Atlanta United — they regularly draw 70,000+ fans, highest in MLS"],note:"Atlanta United routinely breaks MLS attendance records. Soccer is serious business in Atlanta."},
+  ],
+  "Massachusetts":[
+    {tFull:"New England Patriots (NFL)",tName:"New England Patriots",st:"football",tWiki:"https://en.wikipedia.org/wiki/New_England_Patriots",say:["the Patriots","the Pats","New England football"],avoid:["New England Patriots in full — the Pats is what locals say"],note:"The Patriots dynasty (Belichick and Brady) produced 6 Super Bowl titles. Boston sports loyalty is all-encompassing."},
+    {tFull:"Boston Celtics (NBA)",tName:"Boston Celtics",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Boston_Celtics",say:["the Celtics","the C's","Boston basketball"],avoid:["Boston Celtics in full — the C's is the casual insider shorthand"],note:"The Celtics are the most successful franchise in NBA history with 18 championships. Larry Bird and Bill Russell are gods in Boston."},
+    {tFull:"Boston Bruins (NHL)",tName:"Boston Bruins",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Boston_Bruins",say:["the Bruins","the B's","Boston hockey"],avoid:["Boston Bruins in full — the B's is the local shorthand"],note:"The Bruins are one of the Original Six NHL franchises. Boston Garden atmosphere is legendary."},
+  ],
+  "Nevada":[
+    {tFull:"Vegas Golden Knights (NHL)",tName:"Vegas Golden Knights",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Vegas_Golden_Knights",say:["the Knights","Golden Knights","Vegas hockey"],avoid:["Underestimating Golden Knights passion — Vegas adopted hockey immediately and ferociously"],note:"The Golden Knights reached the Stanley Cup Finals in their inaugural season (2017-18) and won in 2023. T-Mobile Arena is an electric atmosphere."},
+  ],
+  "Michigan":[
+    {tFull:"Detroit Tigers (MLB)",tName:"Detroit Tigers",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Detroit_Tigers",say:["the Tigers","Detroit baseball"],avoid:["Detroit Tigers in full — just the Tigers"],note:"The Tigers have a storied history with legends like Ty Cobb, Hank Greenberg, and Al Kaline. Comerica Park is a beautiful stadium."},
+    {tFull:"Detroit Red Wings (NHL)",tName:"Detroit Red Wings",st:"hockey",tWiki:"https://en.wikipedia.org/wiki/Detroit_Red_Wings",say:["the Red Wings","the Wings","Hockeytown"],avoid:["Detroit Red Wings in full — the Wings or Hockeytown are how locals talk"],note:"Hockeytown is Detroit's official nickname. The Red Wings won 4 Stanley Cups in 11 years (1997-2008). Octopus-throwing is a legendary fan tradition."},
+    {tFull:"Detroit Pistons (NBA)",tName:"Detroit Pistons",st:"basketball",tWiki:"https://en.wikipedia.org/wiki/Detroit_Pistons",say:["the Pistons","Detroit basketball","the Bad Boys"],avoid:["Detroit Pistons in full — just the Pistons"],note:"The Bad Boys era Pistons (Isiah Thomas) are legendary. The Pistons beat the Lakers and Celtics dynasties with physicality and teamwork."},
+  ],
+  "Arizona":[
+    {tFull:"Arizona Cardinals (NFL)",tName:"Arizona Cardinals",st:"football",tWiki:"https://en.wikipedia.org/wiki/Arizona_Cardinals",say:["the Cardinals","the Cards","Arizona football"],avoid:["Arizona Cardinals in full — the Cards or Cardinals in conversation"],note:"The Cardinals are the oldest professional football team in America. State Farm Stadium hosts major events including Super Bowls."},
+    {tFull:"Arizona Diamondbacks (MLB)",tName:"Arizona Diamondbacks",st:"baseball",tWiki:"https://en.wikipedia.org/wiki/Arizona_Diamondbacks",say:["the D-backs","the Diamondbacks","AZ baseball"],avoid:["Arizona Diamondbacks in full — D-backs is the universal shorthand"],note:"The D-backs beat the Yankees in the 2001 World Series in one of the most dramatic finishes in baseball history."},
+  ],
+};
+
 // ── GAME ENGINE ──────────────────────────────────────────────
 let session=[],idx=0,score=0,answered=false,curSt=null,curRegion=null;
 let usTopoData=null,worldTopoData=null;
@@ -413,6 +484,16 @@ function makeQ(st){
     pool=[
       {tag:"food",prompt:`You are at ${st.ctx} and meet someone from ${st.city}, ${st.s}. They mention missing the local food. What dish are they most likely talking about?`,correct:st.qF[0],opts:shuffle(st.qF),fb:`${st.qF[0]} is a signature dish of ${st.s}. Mentioning you have heard of it is a natural conversation bridge.`,pills:[{l:"Landmark",v:st.landmark},{l:"Team",v:st.tFull}],links:lnk([{c:"lnk-wiki",u:st.fWiki,i:"📖",l:"Read about "+st.food}])},
       {tag:"sports",prompt:`A colleague at ${st.ctx} from ${st.s} mentions their hometown team had a big game. Which team are they most likely talking about?`,correct:st.tFull,opts:shuffle(st.qT),fb:`That is the ${st.tName} — the go-to team in ${st.s}. Here is how locals actually talk about them:`,pills:[{l:"Famous food",v:st.food},{l:"Landmark",v:st.landmark}],links:lnk([{c:"lnk-team",u:st.tWiki,i:"📖",l:"Read about the "+st.tName}])},
+      // Secondary team question - uses alternate sports teams when available
+      ...(SEC_TEAMS[st.s]?[{tag:"sports",
+        prompt:`You are at ${st.ctx} chatting with someone from ${st.s}. They mention their favorite team — but it is not the ${st.tName}. Which other major ${st.s} team might they be talking about?`,
+        correct:SEC_TEAMS[st.s][Math.floor(Math.random()*SEC_TEAMS[st.s].length)].tFull,
+        opts:(()=>{const sec=SEC_TEAMS[st.s];const pick=sec[Math.floor(Math.random()*sec.length)];const others=sec.filter(t=>t.tFull!==pick.tFull).slice(0,2).map(t=>t.tFull);const wrongs=[st.tFull,...others].filter(t=>t!==pick.tFull).slice(0,3);return shuffle([pick.tFull,...wrongs]);})(),
+        fb:(()=>{const sec=SEC_TEAMS[st.s];const pick=sec[0];return `${st.s} has multiple major teams across different sports. Here is how locals talk about the ${pick.tName}:`;})(),
+        pills:[{l:"Famous food",v:st.food},{l:"Primary team",v:st.tFull}],
+        links:(()=>{const sec=SEC_TEAMS[st.s];const pick=sec[0];return lnk([{c:"lnk-team",u:pick.tWiki,i:"📖",l:"Read about the "+pick.tName}]);})(),
+        secTeam:SEC_TEAMS[st.s][0]}]:[]
+      ),
       {tag:"landmark",prompt:`At ${st.ctx}, someone from ${st.s} says "If you ever visit, you absolutely have to see it." What landmark are they most likely referring to?`,correct:st.qL[0],opts:shuffle(st.qL),fb:`${st.qL[0]} is one of ${st.s}'s most iconic sites. Asking "is it as impressive as they say?" invites a great story.`,pills:[{l:"Famous food",v:st.food},{l:"Team",v:st.tFull}],links:lnk([{c:"lnk-wiki",u:st.lWiki,i:"📖",l:"Read about it"},{c:"lnk-maps",u:st.lMaps,i:"🗺",l:"See on Google Maps"}])},
       {tag:"culture",prompt:`You are preparing for a business dinner with someone from ${st.s} at ${st.ctx}. Which best describes their communication and cultural style?`,correct:st.qC[0],opts:shuffle(st.qC),fb:`${st.eco}. ${st.comm}.`,pills:[{l:"Religion landscape",v:st.rel},{l:"Pro tip",v:st.tip}],links:''},
     ];
@@ -561,16 +642,34 @@ function pick(btn){
     if(b._correct)b.classList.add('correct');
     else if(b===btn&&!correct)b.classList.add('wrong');
   });
-  const pills=q.pills.map(p=>`<span class="fp"><strong>${p.l}:</strong> ${p.v}</span>`).join('');
+  const pills=q.pills.map(p=>{
+    let url='';
+    if(p.l==='Landmark') url=st.lWiki||'';
+    if(p.l==='Team') url=st.tWiki||'';
+    if(p.l==='Famous food') url=st.fWiki||'';
+    if(url) return`<a class="fp fp-link" href="${url}" target="_blank" rel="noopener"><strong>${p.l}:</strong> ${p.v} ↗</a>`;
+    return`<span class="fp"><strong>${p.l}:</strong> ${p.v}</span>`;
+  }).join('');
 
   let extra='';
 
   // Sports box
   if(q.tag==='sports'){
-    const sayItems=st.say.map(phrase=>{const pi=rp(phrase);return`<div class="say-item"><span class="say-text">${phrase}</span><button class="say-btn" onclick="si(${pi},this)">🔊</button></div>`;}).join('');
-    const avoidItems=st.avoid.map(a=>`<div class="avoid-item">${a}</div>`).join('');
-    const icon=SPORT_E[st.st]||'🏆';
-    extra=`<div class="sp-box"><div class="sp-title">How locals actually talk about this team</div><div class="team-row"><div class="team-icon">${icon}</div><div><div class="team-name">${st.tName}</div><div style="font-size:.72rem;color:var(--text2);margin-top:2px">${st.tFull}</div></div></div><div class="sp-section"><div class="sp-lbl">Say this</div><div class="say-list">${sayItems}</div></div><div class="sp-section"><div class="sp-lbl">Avoid</div><div class="avoid-list">${avoidItems}</div></div><div class="sp-section"><div class="sp-lbl">Local knowledge</div><div class="sp-note-text">${st.note}</div></div></div>`;
+    // Use secTeam data if this is a secondary question, otherwise use primary
+    const teamData = q.secTeam || st;
+    const sayArr = q.secTeam ? q.secTeam.say : st.say;
+    const avoidArr = q.secTeam ? q.secTeam.avoid : st.avoid;
+    const noteText = q.secTeam ? q.secTeam.note : st.note;
+    const teamNameDisplay = q.secTeam ? q.secTeam.tName : st.tName;
+    const teamFullDisplay = q.secTeam ? q.secTeam.tFull : st.tFull;
+    const sportType = q.secTeam ? q.secTeam.st : st.st;
+    const sayItems=sayArr.map(phrase=>{const pi=rp(phrase);return`<div class="say-item"><span class="say-text">${phrase}</span><button class="say-btn" onclick="si(${pi},this)">🔊</button></div>`;}).join('');
+    const avoidItems=avoidArr.map(a=>`<div class="avoid-item">${a}</div>`).join('');
+    const icon=SPORT_E[sportType]||'🏆';
+    // Other teams in this state
+    const otherTeams=SEC_TEAMS[st.s]||[];
+    const otherTeamsHtml=otherTeams.length?`<div class="sp-section"><div class="sp-lbl">Other ${st.s} teams</div><div style="display:flex;flex-wrap:wrap;gap:6px">${otherTeams.map(t=>`<a class="fp fp-link" href="${t.tWiki}" target="_blank" rel="noopener">${SPORT_E[t.st]||'🏆'} ${t.tName} ↗</a>`).join('')}</div></div>`:'';
+    extra=`<div class="sp-box"><div class="sp-title">How locals actually talk about this team</div><div class="team-row"><div class="team-icon">${icon}</div><div><div class="team-name">${teamNameDisplay}</div><div style="font-size:.72rem;color:var(--text2);margin-top:2px">${teamFullDisplay}</div></div></div><div class="sp-section"><div class="sp-lbl">Say this</div><div class="say-list">${sayItems}</div></div><div class="sp-section"><div class="sp-lbl">Avoid</div><div class="avoid-list">${avoidItems}</div></div><div class="sp-section"><div class="sp-lbl">Local knowledge</div><div class="sp-note-text">${noteText}</div></div>${otherTeamsHtml}</div>`;
   }
 
   // Culture + etiquette box
